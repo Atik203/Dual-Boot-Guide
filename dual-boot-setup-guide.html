@@ -1,0 +1,2148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dual Boot Setup Guide — Atikur's Legion 5</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- Mobile Header -->
+<header class="mobile-header">
+  <button class="menu-toggle" id="menu-btn" onclick="toggleSidebar()" aria-label="Toggle Navigation">
+    <div class="hamburger-box">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </div>
+  </button>
+  <div class="mobile-brand">Legion 5 · 15ACH6</div>
+  <div style="width: 36px;"></div> <!-- Spacer to balance layout alignment -->
+</header>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
+
+<div class="shell">
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="device">Legion 5 · 15ACH6</div>
+    <h1>Dual Boot Setup<br>Complete Guide</h1>
+  </div>
+
+  <div class="sidebar-section-label">Phases</div>
+  <div class="nav-item active" onclick="switchPhase('phase-0', this)">
+    <span class="nav-icon">🔒</span> Phase 0 — Pre-Flight
+    <span class="nav-badge warn">FIRST</span>
+  </div>
+  <div class="nav-item" onclick="switchPhase('phase-1', this)">
+    <span class="nav-icon">🧹</span> Phase 1 — Win Cleanup
+    <span class="nav-badge">~3h</span>
+  </div>
+  <div class="nav-item" onclick="switchPhase('phase-2', this)">
+    <span class="nav-icon">📱</span> Phase 2 — Phone Backup
+    <span class="nav-badge">~1h</span>
+  </div>
+  <div class="nav-item" onclick="switchPhase('phase-3', this)">
+    <span class="nav-icon">💾</span> Phase 3 — USB Boot
+    <span class="nav-badge">~30m</span>
+  </div>
+  <div class="nav-item" onclick="switchPhase('phase-4', this)">
+    <span class="nav-icon">🐧</span> Phase 4 — Install Ubuntu
+    <span class="nav-badge">~45m</span>
+  </div>
+  <div class="nav-item" onclick="switchPhase('phase-4', this)">
+    <span class="nav-icon">🔧</span> Phase 5 — BIOS Setup
+    <span class="nav-badge">~15m</span>
+  </div>
+  <div class="nav-item" onclick="switchPhase('phase-5', this)">
+    <span class="nav-icon">⚙️</span> Phase 6 — Post Install
+    <span class="nav-badge ok">GPU</span>
+  </div>
+  <div class="nav-item" onclick="switchPhase('phase-6', this)">
+    <span class="nav-icon">🤖</span> Phase 7 — AI/ML Stack
+    <span class="nav-badge">~2h</span>
+  </div>
+  <div class="nav-item" onclick="switchPhase('phase-7', this)">
+    <span class="nav-icon">🔗</span> Phase 8 — Dev Stack
+    <span class="nav-badge">~1h</span>
+  </div>
+  <div class="nav-item" onclick="switchPhase('phase-8', this)">
+    <span class="nav-icon">🛡️</span> Phase 9 — Edge Cases
+    <span class="nav-badge warn">READ</span>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-label">
+      <span>Overall Progress</span>
+      <span id="prog-pct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════ MAIN ═══════════ -->
+<div class="main">
+
+<!-- ── PHASE 0 ── -->
+<div class="phase-content active" id="phase-0">
+  <div class="phase-header">
+    <div class="phase-tag">Phase 0</div>
+    <div class="phase-title">🔒 Pre-Flight Checklist</div>
+    <div class="phase-desc">Do NOT skip this phase. Every step here prevents catastrophic data loss. Takes 30–60 minutes but saves hours of recovery.</div>
+  </div>
+  <div class="content-body">
+
+    <div class="callout danger">
+      <span class="callout-icon">🔴</span>
+      <div><strong>STOP.</strong> Before doing anything else, confirm: your 512GB M.2 2242 drive has NO important data on it. This drive will be completely erased for Ubuntu. If you have data on it, back it up NOW before proceeding.</div>
+    </div>
+
+    <div class="step-group">
+      <div class="step-group-title">Storage Inventory</div>
+
+      <div class="step-card warn-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">1</div>
+          <div class="step-title">Identify both M.2 drives in Windows</div>
+          <span class="step-badge badge-warn">IMPORTANT</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>You need to confirm which physical drive is which before installing Ubuntu. A mistake here means erasing the wrong drive.</p>
+          <div class="callout info">
+            <span class="callout-icon">ℹ️</span>
+            <div>Press <code>Win + X</code> → <strong>Disk Management</strong>. You'll see Disk 0 and Disk 1. Note which is 1TB (C: drive) and which is 512GB.</div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">PowerShell (Run as Admin)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Run this to see all drives with size</span>
+<span class="cmd">Get-PhysicalDisk</span> <span class="arg">| Select-Object FriendlyName, MediaType, Size</span>
+
+<span class="cmt"># Also check which slot each is in</span>
+<span class="cmd">Get-Disk</span> <span class="arg">| Select-Object Number, FriendlyName, Size, PartitionStyle</span></pre>
+          </div>
+          <p>Write down or screenshot: <strong>Disk 0 = ___GB</strong> &nbsp;|&nbsp; <strong>Disk 1 = ___GB</strong></p>
+          <div class="callout warn">
+           <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">2</div>
+          <div class="step-title">Storage allocation plan — visualize optimal topology</div>
+          <span class="step-badge badge-info">PLAN</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="storage-viz">
+            <p style="font-size:11px;color:var(--text3);margin-bottom:6px;">512GB Ubuntu Drive (after install)</p>
+            <div class="storage-bar-wrap">
+              <div class="storage-seg" style="flex:20;background:#7c6af7;">OS</div>
+              <div class="storage-seg" style="flex:15;background:#4fc3f7;">CUDA</div>
+              <div class="storage-seg" style="flex:40;background:#69db7c;">Conda/ML</div>
+              <div class="storage-seg" style="flex:30;background:#ffa94d;">Projects</div>
+              <div class="storage-seg" style="flex:100;background:#252a38;color:#64748b;">Free ~200GB</div>
+            </div>
+            <div class="storage-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#7c6af7"></div>Ubuntu OS ~20GB</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#4fc3f7"></div>CUDA/Drivers ~8GB</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#69db7c"></div>Conda + ML envs ~40GB</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#ffa94d"></div>Projects ~30GB</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#252a38"></div>Free ~200GB+</div>
+            </div>
+          </div>
+          <p style="margin-top: 10px; font-weight: 600;">Table 1: Optimal Dual-Boot Partition Topology for a 1TB NVMe Drive</p>
+          <div class="table-container">
+            <table class="data-table">
+              <tr><th>Partition Type</th><th>File System</th><th>Min Size</th><th>Rec Size</th><th>Function</th></tr>
+              <tr><td><strong>EFI System (ESP)</strong></td><td class="mono">FAT32</td><td class="hl">256 MB</td><td class="hl">500 MB</td><td>Houses Windows Boot Manager, GRUB, and Linux initramfs. Prevent capacity bottleneck.</td></tr>
+              <tr><td><strong>Microsoft Reserved (MSR)</strong></td><td class="mono">RAW/None</td><td class="hl">16 MB</td><td class="hl">16 MB</td><td>Required by Windows for dynamic disk operations (immutable block).</td></tr>
+              <tr><td><strong>Windows OS (C:)</strong></td><td class="mono">NTFS</td><td class="hl">100 GB</td><td class="hl">300 GB</td><td class="warn-text">Primary Windows environment and gaming (AAA binaries).</td></tr>
+              <tr><td><strong>Shared Storage</strong></td><td class="mono">exFAT</td><td class="hl">50 GB</td><td class="hl">100 GB</td><td>Platform-agnostic storage, mitigates NTFS-3G driver overhead in Linux.</td></tr>
+              <tr><td><strong>Linux Root (/)</strong></td><td class="mono">ext4/btrfs</td><td class="hl">50 GB</td><td class="hl">530 GB</td><td>Primary Linux filesystem (OS, environment code, user space).</td></tr>
+              <tr><td><strong>Linux Swap</strong></td><td class="mono">Swap</td><td class="hl">Variable</td><td class="hl">16 - 32 GB</td><td>Paging & hibernation caching (typically matching physical RAM size).</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card warn-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">3</div>
+          <div class="step-title">Restructure EFI partition via Diskpart to bypass 100MB limit</div>
+          <span class="step-badge badge-warn">INSTALL SETUP</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>By default, Windows allocates a tiny 100MB EFI system partition (ESP). This fills up rapidly during Linux kernel upgrades. Because the 16MB Microsoft Reserved (MSR) partition directly blocks the ESP, it cannot be expanded later. A clean restructure is required during Windows installation.</p>
+          <ol style="margin-left: 15px; margin-top: 5px;">
+            <li>Boot the Windows 11 installation media USB.</li>
+            <li>On the welcome setup screen (before clicking Install), press <code>Shift + F10</code> to summon the command console.</li>
+            <li>Enter the low-level diskpart interface:</li>
+          </ol>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">WinPE Command Prompt</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmd">diskpart</span>
+<span class="cmt"># List physical drives to find primary NVMe</span>
+<span class="cmd">list disk</span>
+<span class="cmt"># Select NVMe drive (usually disk 0)</span>
+<span class="cmd">select disk 0</span>
+<span class="cmt"># Clear existing OEM partition table (WARNING: erases drive!)</span>
+<span class="cmd">clean</span>
+<span class="cmt"># Create oversized EFI System Partition (ESP)</span>
+<span class="cmd">create partition efi size=500</span>
+<span class="cmd">format quick fs=fat32 label="System"</span>
+<span class="cmt"># Create Microsoft Reserved partition</span>
+<span class="cmd">create partition msr size=16</span>
+<span class="cmd">exit</span></pre>
+          </div>
+          <p>After exiting CMD, continue the graphical setup. Select the "Unallocated Space" to install Windows. It will automatically leverage the 500MB EFI partition you just provisioned.</p>
+        </div>
+      </div>
+
+      <div class="step-card danger-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">4</div>
+          <div class="step-title">Back up E: drive (65GB dev drive) to phone NOW</div>
+          <span class="step-badge badge-critical">CRITICAL</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Your E: drive (65GB development drive) must be backed up before anything changes. If E: is on the 512GB drive being erased, this is your only chance.</p>
+          <div class="callout danger">
+            <span class="callout-icon">🔴</span>
+            <div>Check Disk Management: if your E: drive partition lives on the <strong>512GB M.2 2242</strong>, you MUST back it up before Ubuntu install erases everything on that disk.</div>
+          </div>
+          <p>We'll do the full phone backup process in Phase 2. For now, don't proceed until you know where E: lives physically.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">PowerShell</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Find which physical disk E: is on</span>
+<span class="cmd">Get-Partition</span> <span class="arg">| Where-Object DriveLetter -eq 'E' | Get-Disk</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">5</div>
+          <div class="step-title">Create a Windows 11 System Restore Point</div>
+          <span class="step-badge badge-warn">SAFETY</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <ol>
+            <li>Press <code>Win + S</code> → type <strong>"Create a restore point"</strong> → open it</li>
+            <li>Click on <strong>C: drive</strong> in the list → click <strong>"Configure"</strong></li>
+            <li>Select <strong>"Turn on system protection"</strong> → set disk space to ~5GB → <strong>OK</strong></li>
+            <li>Back in main window → click <strong>"Create"</strong> → name it <code>Before_DualBoot_Setup</code></li>
+            <li>Wait for confirmation: "The restore point was created successfully"</li>
+          </ol>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>This lets you roll back Windows to its current state if anything goes wrong during BIOS/GRUB changes.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card danger-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">6</div>
+          <div class="step-title">Decrypt or Suspend Windows BitLocker Drive Encryption</div>
+          <span class="step-badge badge-critical">SAFETY</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>BitLocker relies on the TPM (Trusted Platform Module) to release the decryption key by measuring the system boot states (PCR registers). Modifying partition layouts or introducing GRUB boot sequences invalidates these PCR hashes, permanently locking you out of Windows with a BitLocker Recovery screen.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">PowerShell (Admin)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Check BitLocker encryption status on all drives</span>
+<span class="cmd">manage-bde</span> <span class="arg">-status</span>
+ 
+<span class="cmt"># Fully disable BitLocker decryption on system drive (highly recommended)</span>
+<span class="cmd">manage-bde</span> <span class="arg">-off C:</span></pre>
+          </div>
+          <div class="callout warn">
+            <span class="callout-icon">⚠️</span>
+            <div>If BitLocker is ON: Wait for full decryption (check status with `manage-bde -status C:` until percentage reaches 0%). Moving/resizing an active BitLocker partition will destroy the header. Retrieve your 48-digit Recovery Key online via <code style="color: var(--accent2)">https://account.microsoft.com/devices/recoverykey</code> beforehand.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">7</div>
+          <div class="step-title">Note Windows product key & save recovery key offline</div>
+          <span class="step-badge badge-info">INFO</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Before proceeding, query and document your Windows product key so you can reactivate it if you need a recovery reinstall.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">PowerShell (Admin)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Query Windows product key</span>
+<span class="cmd">(Get-WmiObject</span> <span class="arg">-query 'select * from SoftwareLicensingService').OA3xOriginalProductKey</span></pre>
+          </div>
+          <p>Write down your Windows Product Key and your 48-digit BitLocker Recovery Key on a physical sheet of paper or save it in your mobile notes. **Do not store it only on the PC.**</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ── PHASE 1 ── -->
+<div class="phase-content" id="phase-1">
+  <div class="phase-header">
+    <div class="phase-tag">Phase 1</div>
+    <div class="phase-title">🧹 Windows Cleanup & WSL Removal</div>
+    <div class="phase-desc">Free up 30–80GB from Windows by removing dev tools, Anaconda, WSL, and temp files. Leaves Windows lean for gaming/browsing only.</div>
+  </div>
+  <div class="content-body">
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <div>Do Phase 2 (phone backup) BEFORE this phase if your E: drive is on the 512GB disk. Otherwise start here. Estimated space recovery: <strong>35–80GB</strong> on C: drive.</div>
+    </div>
+
+    <div class="step-group">
+      <div class="step-group-title">Step 1 — Remove WSL Completely</div>
+
+      <div class="step-card danger-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">1</div>
+          <div class="step-title">Back up any WSL data you need first</div>
+          <span class="step-badge badge-critical">DO FIRST</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">PowerShell (Admin)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># See what WSL distros you have</span>
+<span class="cmd">wsl</span> <span class="arg">--list --verbose</span>
+
+<span class="cmt"># Export a distro if you need it (saves as .tar)</span>
+<span class="cmd">wsl</span> <span class="arg">--export Ubuntu D:\wsl_backup_ubuntu.tar</span>
+
+<span class="cmt"># Check where WSL files actually live (usually C:\Users\you\AppData\Local\Packages)</span>
+<span class="cmd">dir</span> <span class="arg">"$env:LOCALAPPDATA\Packages" | findstr -i ubuntu</span></pre>
+          </div>
+          <div class="callout warn">
+            <span class="callout-icon">⚠️</span>
+            <div>If you have projects, code, or SSH keys inside WSL, copy them out to your E: drive or Windows filesystem before deleting WSL. WSL files live at <code>\\wsl$\Ubuntu\home\username\</code> in File Explorer.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">2</div>
+          <div class="step-title">Unregister and delete all WSL distros</div>
+          <span class="step-badge badge-warn">~5–20GB</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">PowerShell (Admin)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Unregister Ubuntu (replace name with your distro name from --list)</span>
+<span class="cmd">wsl</span> <span class="arg">--unregister Ubuntu</span>
+
+<span class="cmt"># If you have multiple distros, repeat for each</span>
+<span class="cmd">wsl</span> <span class="arg">--unregister Ubuntu-22.04</span>
+
+<span class="cmt"># Shutdown WSL completely</span>
+<span class="cmd">wsl</span> <span class="arg">--shutdown</span>
+
+<span class="cmt"># Verify nothing remains</span>
+<span class="cmd">wsl</span> <span class="arg">--list</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">3</div>
+          <div class="step-title">Remove WSL Windows Feature</div>
+          <span class="step-badge badge-info">~500MB</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <ol>
+            <li>Press <code>Win + S</code> → "Turn Windows features on or off"</li>
+            <li>Uncheck: <strong>Windows Subsystem for Linux</strong></li>
+            <li>Uncheck: <strong>Virtual Machine Platform</strong> (if you don't use Hyper-V)</li>
+            <li>Click <strong>OK</strong> → Restart when prompted</li>
+          </ol>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">PowerShell (Admin) — Alternative</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmd">dism.exe</span> <span class="arg">/online /disable-feature /featurename:Microsoft-Windows-Subsystem-Linux /norestart</span>
+<span class="cmd">dism.exe</span> <span class="arg">/online /disable-feature /featurename:VirtualMachinePlatform /norestart</span>
+<span class="cmd">shutdown</span> <span class="arg">/r /t 0</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-group">
+      <div class="step-group-title">Step 2 — Remove Anaconda & Python Dev Tools</div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">4</div>
+          <div class="step-title">Properly uninstall Anaconda (not just delete folder)</div>
+          <span class="step-badge badge-warn">~15–40GB</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <ol>
+            <li>Open <strong>Anaconda Navigator</strong> → Close it</li>
+            <li>Open <strong>Anaconda Prompt</strong> (search in Start)</li>
+          </ol>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Anaconda Prompt</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Install the Anaconda clean tool first</span>
+<span class="cmd">conda</span> <span class="arg">install anaconda-clean</span>
+<span class="cmt"># Run it — type 'yes' to delete everything</span>
+<span class="cmd">anaconda-clean</span> <span class="arg">--yes</span></pre>
+          </div>
+          <ol start="3">
+            <li>Now go to <strong>Settings → Apps → Installed Apps</strong></li>
+            <li>Search <strong>"Anaconda"</strong> → click → <strong>Uninstall</strong></li>
+            <li>Follow the uninstaller. Select <strong>"Remove PATH entries"</strong> if asked</li>
+          </ol>
+          <div class="callout warn">
+            <span class="callout-icon">⚠️</span>
+            <div>After uninstall, manually delete leftover folders:</div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">PowerShell (Admin)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Delete Anaconda leftover (replace 'YourName' with your username)</span>
+<span class="cmd">Remove-Item</span> <span class="arg">-Recurse -Force "C:\Users\YourName\anaconda3" -ErrorAction SilentlyContinue</span>
+<span class="cmd">Remove-Item</span> <span class="arg">-Recurse -Force "C:\ProgramData\Anaconda3" -ErrorAction SilentlyContinue</span>
+
+<span class="cmt"># Delete conda cache</span>
+<span class="cmd">Remove-Item</span> <span class="arg">-Recurse -Force "C:\Users\YourName\.conda" -ErrorAction SilentlyContinue</span>
+<span class="cmd">Remove-Item</span> <span class="arg">-Recurse -Force "C:\Users\YourName\AppData\Roaming\conda" -ErrorAction SilentlyContinue</span>
+
+<span class="cmt"># Delete pip cache</span>
+<span class="cmd">Remove-Item</span> <span class="arg">-Recurse -Force "C:\Users\YourName\AppData\Local\pip" -ErrorAction SilentlyContinue</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">5</div>
+          <div class="step-title">Remove Node.js, npm, Yarn, pnpm</div>
+          <span class="step-badge badge-info">~2–8GB</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <ol>
+            <li>Settings → Apps → Uninstall <strong>Node.js</strong></li>
+          </ol>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">PowerShell (Admin)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Delete npm global cache and packages</span>
+<span class="cmd">Remove-Item</span> <span class="arg">-Recurse -Force "C:\Users\YourName\AppData\Roaming\npm" -ErrorAction SilentlyContinue</span>
+<span class="cmd">Remove-Item</span> <span class="arg">-Recurse -Force "C:\Users\YourName\AppData\Roaming\npm-cache" -ErrorAction SilentlyContinue</span>
+
+<span class="cmt"># Delete Yarn cache</span>
+<span class="cmd">Remove-Item</span> <span class="arg">-Recurse -Force "C:\Users\YourName\AppData\Local\Yarn" -ErrorAction SilentlyContinue</span>
+<span class="cmd">Remove-Item</span> <span class="arg">-Recurse -Force "C:\Users\YourName\AppData\Local\yarn" -ErrorAction SilentlyContinue</span>
+
+<span class="cmt"># Delete pnpm store</span>
+<span class="cmd">Remove-Item</span> <span class="arg">-Recurse -Force "C:\Users\YourName\AppData\Local\pnpm" -ErrorAction SilentlyContinue</span>
+
+<span class="cmt"># Delete NVM for Windows if installed</span>
+<span class="cmd">Remove-Item</span> <span class="arg">-Recurse -Force "C:\Users\YourName\AppData\Roaming\nvm" -ErrorAction SilentlyContinue</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">6</div>
+          <div class="step-title">Remove other dev tools (Docker, Python, CUDA)</div>
+          <span class="step-badge badge-warn">~10–30GB</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Go to Settings → Apps. Uninstall each:</p>
+          <ul class="checklist">
+            <li><strong>Docker Desktop</strong> — then delete <code>C:\ProgramData\Docker</code> and <code>C:\Users\YourName\.docker</code></li>
+            <li><strong>Python 3.x</strong> (any standalone installs)</li>
+            <li><strong>CUDA Toolkit</strong> (Windows version — you'll use Linux CUDA)</li>
+            <li><strong>NVIDIA cuDNN</strong> (Windows version)</li>
+            <li><strong>Git for Windows</strong> (optional — keep if you want it on Windows)</li>
+            <li><strong>PostgreSQL</strong> (if installed locally)</li>
+          </ul>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">PowerShell (Admin)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Delete Docker leftover data (can be 10-50GB!)</span>
+<span class="cmd">Remove-Item</span> <span class="arg">-Recurse -Force "C:\ProgramData\DockerDesktop" -ErrorAction SilentlyContinue</span>
+<span class="cmd">Remove-Item</span> <span class="arg">-Recurse -Force "C:\Users\YourName\.docker" -ErrorAction SilentlyContinue</span>
+
+<span class="cmt"># Delete HuggingFace model cache (can be HUGE)</span>
+<span class="cmd">Remove-Item</span> <span class="arg">-Recurse -Force "C:\Users\YourName\.cache\huggingface" -ErrorAction SilentlyContinue</span>
+
+<span class="cmt"># Delete torch cache</span>
+<span class="cmd">Remove-Item</span> <span class="arg">-Recurse -Force "C:\Users\YourName\.cache\torch" -ErrorAction SilentlyContinue</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">7</div>
+          <div class="step-title">Clear PATH environment variables</div>
+          <span class="step-badge badge-info">CLEANUP</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <ol>
+            <li>Press <code>Win + S</code> → "Edit environment variables for your account"</li>
+            <li>Click <strong>PATH</strong> in User variables → <strong>Edit</strong></li>
+            <li>Remove any entries pointing to deleted tools: anaconda, conda, node, npm, python, cuda</li>
+            <li>Also check System variables → PATH for the same</li>
+            <li>Click OK → Restart PC</li>
+          </ol>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>After restarting, open a new PowerShell and type <code>node</code>, <code>python</code>, <code>conda</code>. Each should say "not recognized" — confirming clean removal.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">8</div>
+          <div class="step-title">Run Windows Disk Cleanup + Storage Sense</div>
+          <span class="step-badge badge-info">~2–10GB</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <ol>
+            <li>Press <code>Win + S</code> → "Disk Cleanup" → select <strong>C: drive</strong></li>
+            <li>Click <strong>"Clean up system files"</strong> (important — gets Windows Update cache)</li>
+            <li>Check ALL boxes especially: <strong>Windows Update Cleanup, Temporary Files, Delivery Optimization</strong></li>
+            <li>Click <strong>OK → Delete Files</strong></li>
+          </ol>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">PowerShell (Admin) — Additional cleanup</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Clear Windows temp files</span>
+<span class="cmd">Remove-Item</span> <span class="arg">-Recurse -Force "$env:TEMP\*" -ErrorAction SilentlyContinue</span>
+<span class="cmd">Remove-Item</span> <span class="arg">-Recurse -Force "C:\Windows\Temp\*" -ErrorAction SilentlyContinue</span>
+
+<span class="cmt"># Clear VS Code extensions cache (keep VS Code itself)</span>
+<span class="cmt"># Only run if you want to reinstall extensions on Ubuntu</span>
+<span class="cmt"># Remove-Item -Recurse -Force "C:\Users\YourName\.vscode\extensions" -ErrorAction SilentlyContinue</span>
+
+<span class="cmt"># Verify current C: drive free space</span>
+<span class="cmd">Get-PSDrive</span> <span class="arg">C | Select-Object Used,Free</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── PHASE 2 ── -->
+<div class="phase-content" id="phase-2">
+  <div class="phase-header">
+    <div class="phase-tag">Phase 2</div>
+    <div class="phase-title">📱 Vivo X300 Pro Phone Backup</div>
+    <div class="phase-desc">Back up your 65GB E: drive (dev backend) + other documents to your phone's 350GB free space. Two methods: USB direct transfer + optional wireless sync.</div>
+  </div>
+  <div class="content-body">
+
+    <div class="callout info">
+      <span class="callout-icon">ℹ️</span>
+      <div>Your Vivo X300 Pro runs Android (OriginOS/FuntouchOS). The backup process uses USB file transfer (MTP). Your phone has 350GB free — more than enough for the 65GB E: drive.</div>
+    </div>
+
+    <div class="step-group">
+      <div class="step-group-title">Method A — USB Direct Transfer (Recommended)</div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">1</div>
+          <div class="step-title">Enable USB File Transfer on Vivo X300 Pro</div>
+          <span class="step-badge badge-info">PHONE SETUP</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <ol>
+            <li>Connect phone to laptop via USB cable (use original or good-quality cable)</li>
+            <li>On phone: a notification will appear at the top — pull down notification shade</li>
+            <li>Tap the USB notification — it says <strong>"Charging this device via USB"</strong></li>
+            <li>Tap it → Select: <strong>"File Transfer / Android Auto"</strong> → Choose <strong>"File Transfer"</strong></li>
+            <li>Phone should now appear in Windows File Explorer as a drive</li>
+          </ol>
+          <div class="callout warn">
+            <span class="callout-icon">⚠️</span>
+            <div>If phone doesn't appear: try a different USB port (use USB 3.0 — the blue ones). If still not showing, install <strong>MTP driver</strong>: Device Manager → Update Driver on the phone device.</div>
+          </div>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>Vivo OriginOS may show this as "Use USB for" → select <strong>"Transferring files"</strong> specifically. Not "Transferring photos (PTP)" — that only works for images.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">2</div>
+          <div class="step-title">Create organized backup folder structure on phone</div>
+          <span class="step-badge badge-info">ORGANIZE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>In File Explorer, navigate to your phone's Internal Storage. Create this folder structure:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Folder Structure (on Phone)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre>📱 Phone Internal Storage/
+└── 📁 LaptopBackup_2026/
+    ├── 📁 E_Drive_Dev/          <span class="cmt">← Your 65GB E: drive goes here</span>
+    │   ├── 📁 backend/          <span class="cmt">← Your dev backend projects</span>
+    │   └── 📁 (other E: folders)
+    ├── 📁 Documents/            <span class="cmt">← Windows Documents folder</span>
+    ├── 📁 SSH_Keys/             <span class="cmt">← CRITICAL: .ssh folder backup</span>
+    ├── 📁 VSCode_Settings/      <span class="cmt">← Extensions list, settings.json</span>
+    ├── 📁 Desktop_Files/        <span class="cmt">← Anything on Desktop</span>
+    └── 📁 Downloads_Important/  <span class="cmt">← Any important downloads</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card danger-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">3</div>
+          <div class="step-title">Back up SSH keys and Git credentials FIRST</div>
+          <span class="step-badge badge-critical">CRITICAL</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>SSH keys are the most commonly forgotten thing. Back these up or you'll lose GitHub access.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">PowerShell</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># See your SSH keys</span>
+<span class="cmd">dir</span> <span class="arg">"C:\Users\YourName\.ssh"</span>
+
+<span class="cmt"># Copy the entire .ssh folder to E: first (as staging area)</span>
+<span class="cmd">Copy-Item</span> <span class="arg">-Recurse "C:\Users\YourName\.ssh" "E:\Backup_SSH\"</span>
+
+<span class="cmt"># Also export Git global config</span>
+<span class="cmd">Copy-Item</span> <span class="arg">"C:\Users\YourName\.gitconfig" "E:\Backup_SSH\gitconfig_backup"</span></pre>
+          </div>
+          <div class="callout warn">
+            <span class="callout-icon">⚠️</span>
+            <div>Files to look for in .ssh: <code>id_rsa</code>, <code>id_ed25519</code>, <code>id_ed25519.pub</code>, <code>config</code>, <code>known_hosts</code>. The <code>.pub</code> files are public (safe). The others without <code>.pub</code> are private — treat them like passwords.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">4</div>
+          <div class="step-title">Copy E: drive to phone (65GB transfer)</div>
+          <span class="step-badge badge-warn">~1–3 hours</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Use <strong>robocopy</strong> for reliable large file transfers — it resumes if interrupted, unlike drag-and-drop which restarts from zero on failure.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">PowerShell (Admin)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Replace X with your phone's drive letter in File Explorer</span>
+<span class="cmt"># (e.g., if phone shows as F:, use F:)</span>
+<span class="cmt"># First, find phone drive letter:</span>
+<span class="cmd">Get-PSDrive</span> <span class="arg">| Where-Object Provider -like "*FileSystem*"</span>
+
+<span class="cmt"># Robust copy command — copies E: to phone</span>
+<span class="cmd">robocopy</span> <span class="arg">E:\ "X:\LaptopBackup_2026\E_Drive_Dev\" /E /COPYALL /R:3 /W:5 /LOG:"C:\robocopy_log.txt" /TEE</span>
+
+<span class="cmt"># Flags explained:</span>
+<span class="cmt"># /E = copy subdirectories including empty ones</span>
+<span class="cmt"># /COPYALL = copy all file attributes</span>
+<span class="cmt"># /R:3 = retry 3 times on failure</span>
+<span class="cmt"># /W:5 = wait 5 seconds between retries</span>
+<span class="cmt"># /LOG = write log file for verification</span>
+<span class="cmt"># /TEE = show progress in console AND log</span></pre>
+          </div>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>MTP (phone USB) transfer speed is typically 15–40 MB/s. At 65GB, expect 30–70 minutes. Keep the phone screen on (set Display Timeout to "Never" in phone settings during transfer).</div>
+          </div>
+          <div class="callout warn">
+            <span class="callout-icon">⚠️</span>
+            <div>Do NOT lock the phone or let it sleep during transfer — MTP connection drops on sleep. On Vivo: Settings → Display → Screen Timeout → set to "30 minutes" or max.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">5</div>
+          <div class="step-title">Back up Documents, Desktop, Downloads</div>
+          <span class="step-badge badge-info">OTHER FILES</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">PowerShell (Admin)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Back up Documents</span>
+<span class="cmd">robocopy</span> <span class="arg">"C:\Users\YourName\Documents" "X:\LaptopBackup_2026\Documents\" /E /R:3 /W:5</span>
+
+<span class="cmt"># Back up Desktop</span>
+<span class="cmd">robocopy</span> <span class="arg">"C:\Users\YourName\Desktop" "X:\LaptopBackup_2026\Desktop_Files\" /E /R:3 /W:5</span>
+
+<span class="cmt"># Export VS Code settings (not the whole app, just config)</span>
+<span class="cmd">robocopy</span> <span class="arg">"C:\Users\YourName\AppData\Roaming\Code\User" "X:\LaptopBackup_2026\VSCode_Settings\" /E /R:3 /W:5</span>
+
+<span class="cmt"># Export installed VS Code extensions list</span>
+<span class="cmd">code</span> <span class="arg">--list-extensions > "X:\LaptopBackup_2026\VSCode_Settings\extensions_list.txt"</span>
+
+<span class="cmt"># Export Git global config</span>
+<span class="cmd">robocopy</span> <span class="arg">"C:\Users\YourName\.ssh" "X:\LaptopBackup_2026\SSH_Keys\" /E /R:3 /W:5</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">6</div>
+          <div class="step-title">Verify backup integrity</div>
+          <span class="step-badge badge-ok">VERIFY</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">PowerShell</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Count files in E: drive</span>
+<span class="cmd">(Get-ChildItem</span> <span class="arg">"E:\" -Recurse -File -ErrorAction SilentlyContinue).Count</span>
+
+<span class="cmt"># Count files in phone backup (replace X:)</span>
+<span class="cmd">(Get-ChildItem</span> <span class="arg">"X:\LaptopBackup_2026\E_Drive_Dev\" -Recurse -File -ErrorAction SilentlyContinue).Count</span>
+
+<span class="cmt"># Check total size of backup</span>
+<span class="cmd">(Get-ChildItem</span> <span class="arg">"X:\LaptopBackup_2026\" -Recurse | Measure-Object Length -Sum).Sum / 1GB</span></pre>
+          </div>
+          <p>File counts should match (or be very close). If there's a big discrepancy, check the robocopy log at <code>C:\robocopy_log.txt</code> for errors.</p>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>Also visually browse the phone backup in File Explorer and spot-check a few project folders to confirm the files actually transferred correctly.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-group">
+      <div class="step-group-title">Method B — Wireless (Optional: for ongoing sync after Ubuntu)</div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">7</div>
+          <div class="step-title">Set up Syncthing for wireless sync (post-Ubuntu)</div>
+          <span class="step-badge badge-info">OPTIONAL</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>After Ubuntu is set up, use Syncthing to wirelessly keep your dev folder in sync with your phone over WiFi — much faster than USB for day-to-day use.</p>
+          <ul>
+            <li>Install <strong>Syncthing</strong> on Ubuntu: <code>sudo apt install syncthing</code></li>
+            <li>Install <strong>Syncthing Android</strong> app on your Vivo X300 Pro (Play Store)</li>
+            <li>Both on same WiFi → pair devices → sync any folder</li>
+            <li>Speed: ~50–150 MB/s on WiFi 6 vs ~15–40 MB/s on USB MTP</li>
+          </ul>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>Syncthing is open source, no account needed, end-to-end encrypted, and works perfectly on Vivo Android. Great for keeping Scholar-Flow or thesis files automatically backed up to your phone.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── PHASE 3 ── -->
+<div class="phase-content" id="phase-3">
+  <div class="phase-header">
+    <div class="phase-tag">Phase 3</div>
+    <div class="phase-title">💾 Create Ubuntu Bootable USB</div>
+    <div class="phase-desc">Download Ubuntu 26.04 LTS and flash it to a USB drive. You need a USB drive of at least 8GB — this will be erased.</div>
+  </div>
+  <div class="content-body">
+ 
+    <div class="step-group">
+      <div class="step-group-title">Download & Flash</div>
+ 
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">1</div>
+          <div class="step-title">Download Ubuntu 26.04 LTS ISO</div>
+          <span class="step-badge badge-info">~5.5GB</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <ol>
+            <li>Go to: <code>ubuntu.com/download/desktop</code></li>
+            <li>Download <strong>Ubuntu 26.04 LTS</strong> (the "LTS" version — supported until 2031)</li>
+            <li>File will be named like: <code>ubuntu-26.04-desktop-amd64.iso</code> (~5.5GB)</li>
+            <li>Verify the SHA256 checksum after download:</li>
+          </ol>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">PowerShell</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Verify ISO integrity (compare with SHA256SUMS from releases.ubuntu.com/26.04/)</span>
+<span class="cmd">Get-FileHash</span> <span class="arg">"C:\Users\YourName\Downloads\ubuntu-26.04-desktop-amd64.iso" -Algorithm SHA256</span></pre>
+          </div>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>Why 26.04 LTS? Supported until April 2031, latest system packages (GNOME 50, Linux Kernel 7.0), and excellent Wayland performance. Avoid non-LTS releases for a stable development stack.</div>
+          </div>
+        </div>
+      </div>
+ 
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">2</div>
+          <div class="step-title">Flash ISO to USB with Balena Etcher</div>
+          <span class="step-badge badge-warn">USB ERASED</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <ol>
+            <li>Download <strong>Balena Etcher</strong>: <code>etcher.balena.io</code> (free, portable .exe)</li>
+            <li>Plug in your USB drive (≥8GB) — all data will be erased</li>
+            <li>Open Etcher → Click <strong>"Flash from file"</strong></li>
+            <li>Select your <code>ubuntu-26.04-desktop-amd64.iso</code></li>
+            <li>Click <strong>"Select target"</strong> → select your USB drive (double-check the size!)</li>
+            <li>Click <strong>"Flash!"</strong> → enter admin password if prompted</li>
+            <li>Wait ~10–15 minutes → Etcher will validate automatically</li>
+            <li>When done: <strong>"Flash Complete!" + green checkmark</strong></li>
+          </ol>
+          <div class="callout warn">
+            <span class="callout-icon">⚠️</span>
+            <div>After flashing, Windows may say "USB drive needs to be formatted" — click <strong>Cancel/No</strong>. The USB is correctly formatted as Linux bootable and Windows can't read it. Don't format it.</div>
+          </div>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>Alternative to Etcher: <strong>Rufus</strong> (also free). If using Rufus: Partition scheme = <strong>GPT</strong>, Target system = <strong>UEFI (non CSM)</strong>, File system = <strong>FAT32</strong>.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PHASE 4 ── -->
+<div class="phase-content" id="phase-4">
+  <div class="phase-header">
+    <div class="phase-tag">Phase 4 + 5</div>
+    <div class="phase-title">🔧 BIOS Setup + Ubuntu Installation</div>
+    <div class="phase-desc">Configure BIOS for dual boot, then install Ubuntu on the 512GB M.2 drive. The most critical phase — follow each step exactly.</div>
+  </div>
+  <div class="content-body">
+
+    <div class="step-group">
+      <div class="step-group-title">Part A — BIOS Configuration (Legion 5)</div>
+
+      <div class="step-card danger-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">1</div>
+          <div class="step-title">Enter BIOS on Lenovo Legion 5</div>
+          <span class="step-badge badge-critical">EXACT KEYS</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <ol>
+            <li>Fully shut down Windows (not restart)</li>
+            <li>Press power button → <strong>immediately and repeatedly press F2</strong> (BIOS) or <strong>F12</strong> (boot menu)</li>
+            <li>If Windows boots normally → shut down and try again faster</li>
+          </ol>
+          <div class="callout warn">
+            <span class="callout-icon">⚠️</span>
+            <div><strong>If Fast Boot is ON in Windows:</strong> You may not have time to press F2. Fix first: Settings → System → Power → "Additional power settings" → "Choose what power buttons do" → uncheck "Turn on fast startup" → Save. Then shut down normally and try F2.</div>
+          </div>
+          <div class="callout info">
+            <span class="callout-icon">ℹ️</span>
+            <div>Alternative: Hold <code>Shift</code> while clicking Restart in Windows → "Use a device" → "UEFI Firmware Settings". This takes you directly to BIOS.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card danger-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">2</div>
+          <div class="step-title">BIOS settings to change</div>
+          <span class="step-badge badge-critical">DO ALL OF THESE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="table-container">
+            <table class="data-table">
+              <tr><th>BIOS Setting</th><th>Location</th><th>Set To</th><th>Why</th></tr>
+              <tr><td><strong>Secure Boot</strong></td><td>Security tab</td><td class="hl">ENABLED (Recommended)</td><td>Required for Windows 11 compliance and anti-cheat games (Valorant). Ubuntu supports UEFI Secure Boot natively. Keep enabled.</td></tr>
+              <tr><td><strong>Fast Boot</strong></td><td>Boot tab</td><td class="warn-text">DISABLED</td><td>Prevents GRUB from loading properly</td></tr>
+              <tr><td><strong>SATA Mode</strong></td><td>Configuration</td><td class="hl">AHCI (confirm only)</td><td>Should already be AHCI — confirm only</td></tr>
+              <tr><td><strong>Boot Mode</strong></td><td>Boot tab</td><td class="hl">UEFI (keep)</td><td>Don't change to Legacy/CSM</td></tr>
+              <tr><td><strong>Boot Priority</strong></td><td>Boot tab</td><td class="warn-text">USB first</td><td>Temporarily — to boot installer</td></tr>
+            </table>
+          </div>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div><strong>Secure Boot Options & Tradeoffs:</strong>
+              <ul style="margin-left: 15px; margin-top: 5px;">
+                <li><strong>Enabled (Recommended):</strong> Mandated for Windows 11 compliance and kernel-level anti-cheat engines (Riot Vanguard for Valorant/League of Legends). Requires completing MOK (Machine Owner Key) enrollment in Phase 6 to sign and load the Nvidia proprietary modules.</li>
+                <li><strong>Disabled (Fallback / Simple Path):</strong> The path of least resistance for Linux driver compatibility. Bypasses MOK signing requirements for Nvidia, MediaTek Wi-Fi, and custom Realtek audio patches, but weakens boot security and disables Vanguard anti-cheat on Windows.</li>
+              </ul>
+            </div>
+          </div>
+          <p>Press <strong>F10</strong> to Save and Exit. PC will restart.</p>
+        </div>
+      </div>
+ 
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">3</div>
+          <div class="step-title">Boot from USB — select Ubuntu installer</div>
+          <span class="step-badge badge-info">BOOT</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <ol>
+            <li>With USB plugged in, power on → press <strong>F12</strong> for boot menu</li>
+            <li>You'll see a list of boot devices</li>
+            <li>Select your USB drive (will show brand name + "USB" or "UEFI USB")</li>
+            <li>Select the <strong>UEFI</strong> version of your USB if two options appear</li>
+            <li>Ubuntu GRUB menu will appear → select <strong>"Try or Install Ubuntu"</strong></li>
+            <li>Wait ~60–90 seconds for Ubuntu desktop to load</li>
+          </ol>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>Ubuntu will run live from USB first. You can test WiFi, check if the touchpad works, etc. This is the "Try Ubuntu" mode — nothing is installed yet.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="step-group">
+      <div class="step-group-title">Part B — Ubuntu Installation (Every Screen)</div>
+ 
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">4</div>
+          <div class="step-title">Ubuntu installer — screen by screen</div>
+          <span class="step-badge badge-critical">EVERY OPTION</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <ol>
+            <li><strong>Welcome screen:</strong> Click <strong>"Install Ubuntu"</strong></li>
+            <li><strong>Language:</strong> English → <strong>Continue</strong></li>
+            <li><strong>Keyboard:</strong> English (US) → <strong>Continue</strong></li>
+            <li><strong>Connect to WiFi:</strong> Connect to your network (optional but recommended for updates) → <strong>Continue</strong></li>
+            <li><strong>What apps to install:</strong> Select <strong>"Default selection"</strong> (NOT "Extended selection" — you'll install ML tools manually) → <strong>Continue</strong></li>
+            <li><strong>Install recommended drivers?</strong> Check <strong>"Install third-party software for graphics and WiFi"</strong> → <strong>Continue</strong></li>
+          </ol>
+          <div class="callout danger">
+            <span class="callout-icon">⚠️</span>
+            <div><strong>WARNING: TPM-Backed Encryption.</strong> In Ubuntu 26.04, the installer offers LVM and TPM-backed Full Disk Encryption (FDE). **Do NOT enable encryption.** Running TPM encryption on a dual-boot setup will conflict with Windows' control of the hardware TPM chip, leading to boot lockouts on both systems. Keep encryption disabled.</div>
+          </div>
+          <div class="callout warn">
+            <span class="callout-icon">⚠️</span>
+            <div>The next screen (Disk setup) is the most critical. Read Step 5 carefully before clicking anything.</div>
+          </div>
+        </div>
+      </div>
+ 
+      <div class="step-card danger-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">5</div>
+          <div class="step-title">Installation type — CRITICAL partition selection</div>
+          <span class="step-badge badge-critical">READ FULLY</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="callout danger">
+            <span class="callout-icon">🔴</span>
+            <div>This is where accidental data loss happens. Do NOT click "Erase disk and install Ubuntu" or you'll lose Windows. Select manual partitioning.</div>
+          </div>
+          <ol>
+            <li>On "Disk setup" screen → Select <strong>"Manual partitioning"</strong></li>
+            <li>Click <strong>Next/Continue</strong></li>
+          </ol>
+          <p>You'll see a partition table. Identify your 512GB drive:</p>
+          <ul>
+            <li>Look for the drive with ~476GB total (shows as <code>/dev/nvme0n1</code> or <code>/dev/nvme1n1</code>)</li>
+            <li>The 1TB Windows drive will have Windows partitions (EFI, Recovery, C:) — leave this one ALONE</li>
+          </ul>
+          <div class="callout warn">
+            <span class="callout-icon">⚠️</span>
+            <div>If the 512GB drive has existing partitions (from your E: drive), select each partition on that drive and click the <strong>"-"</strong> button to delete them. This completely erases the drive. Only do this to the 512GB drive.</div>
+          </div>
+          <p>After clearing the 512GB drive, you'll have "free space". Now create these partitions:</p>
+          <table class="data-table">
+            <tr><th>Partition</th><th>Size</th><th>Type</th><th>Mount Point</th><th>Filesystem</th></tr>
+            <tr><td>EFI (boot)</td><td class="hl">512 MB</td><td>Primary</td><td><code>/boot/efi</code></td><td>EFI System Partition</td></tr>
+            <tr><td>Root</td><td class="hl">Remaining (~475GB)</td><td>Primary</td><td><code>/</code></td><td>ext4</td></tr>
+          </table>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>No swap partition needed — you have 32GB RAM. Ubuntu will use a swapfile automatically. No separate /home partition needed on 476GB — keep it simple with one big root partition.</div>
+          </div>
+          <ol start="3">
+            <li>Select the free space → Click the <strong>"+"</strong> button</li>
+            <li>Create EFI: Size = 512 MB, Use as = EFI System Partition → OK</li>
+            <li>Select remaining free space → Click <strong>"+"</strong></li>
+            <li>Create Root: Size = (all remaining), Use as = Ext4, Mount point = <code>/</code> → OK</li>
+            <li><strong>Device for boot loader installation:</strong> Set to your 512GB drive (e.g., <code>/dev/nvme1n1</code>) — NOT a specific partition</li>
+            <li>Click <strong>"Install Now"</strong> → Click <strong>"Continue"</strong> on confirmation</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">6</div>
+          <div class="step-title">Complete installation — timezone, user account</div>
+          <span class="step-badge badge-info">FINAL SCREENS</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <ol>
+            <li><strong>Where are you:</strong> Click Dhaka on map → "Asia/Dhaka" → <strong>Continue</strong></li>
+            <li><strong>Who are you:</strong>
+              <ul>
+                <li>Your name: <code>Atikur Rahman</code> (or your preferred name)</li>
+                <li>Computer name: <code>legion5-ubuntu</code> (keep it short, no spaces)</li>
+                <li>Username: <code>atikur</code> (lowercase, no spaces)</li>
+                <li>Password: something you'll remember</li>
+                <li>Select: <strong>"Require my password to log in"</strong></li>
+              </ul>
+            </li>
+            <li>Click <strong>Continue</strong> → Installation begins (~10–20 minutes)</li>
+            <li>When done: Click <strong>"Restart Now"</strong></li>
+            <li>Screen will say "Remove the installation medium, then press ENTER"</li>
+            <li>Remove the USB drive → Press Enter</li>
+          </ol>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>After restart, you should see the <strong>GRUB boot menu</strong> with "Ubuntu" and "Windows Boot Manager". This confirms the dual boot is working. Default is Ubuntu — press arrow key and Enter for Windows.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PHASE 5 (now Phase 6 in nav = Post Install) ── -->
+<div class="phase-content" id="phase-5">
+  <div class="phase-header">
+    <div class="phase-tag">Phase 6</div>
+    <div class="phase-title">⚙️ Post-Install System Setup</div>
+    <div class="phase-desc">First boot into Ubuntu. Set up NVIDIA drivers, system updates, essential tools. Get your RTX 3060 working properly on Linux.</div>
+  </div>
+  <div class="content-body">
+
+    <div class="step-group">
+      <div class="step-group-title">System Updates & NVIDIA Drivers</div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">1</div>
+          <div class="step-title">First boot — update everything</div>
+          <span class="step-badge badge-warn">DO FIRST</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Full system update</span>
+<span class="cmd">sudo apt update</span> <span class="arg">&& sudo apt upgrade -y</span>
+
+<span class="cmt"># Install essential build tools</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y build-essential curl wget git unzip zip htop tree neofetch</span>
+
+<span class="cmt"># Check your GPU is detected</span>
+<span class="cmd">lspci</span> <span class="arg">| grep -i nvidia</span>
+
+<span class="cmt"># Check kernel version</span>
+<span class="cmd">uname</span> <span class="arg">-r</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card danger-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">2</div>
+          <div class="step-title">Install NVIDIA driver for RTX 3060 (with Secure Boot MOK)</div>
+          <span class="step-badge badge-critical">GPU SETUP</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Ubuntu 26.04 runs a Wayland-only GNOME session. The open-source Nouveau driver is unstable under Wayland for NVIDIA GPUs. You MUST install the proprietary NVIDIA driver for basic performance and display correctness.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Check which NVIDIA driver is recommended</span>
+<span class="cmd">ubuntu-drivers devices</span>
+
+<span class="cmt"># Install the recommended driver (usually nvidia-driver-550 or 560)</span>
+<span class="cmd">sudo ubuntu-drivers autoinstall</span>
+
+<span class="cmt"># OR install specific version manually</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y nvidia-driver-560</span></pre>
+          </div>
+
+          <div class="callout warn">
+            <span class="callout-icon">⚠️</span>
+            <div><strong>Secure Boot Password (MOK):</strong> During driver installation, a terminal prompt will pop up asking to configure a password for Secure Boot / MOK. <strong>Create a simple password (e.g., <code>12345678</code>)</strong> and confirm it. You will need this key upon restart.</div>
+          </div>
+
+          <p>After installation completes, reboot the system:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmd">sudo reboot</span></pre>
+          </div>
+
+          <div class="callout danger">
+            <span class="callout-icon">🔵</span>
+            <div><strong>CRITICAL: Enroll MOK on Reboot (Blue Screen)</strong>
+              <ol style="margin-left: 15px; margin-top: 5px;">
+                <li>On boot, a blue screen will display: <strong>"Perform MOK management"</strong>.</li>
+                <li><strong>Press any key within 10 seconds</strong> to enter the menu. (If you miss it, the drivers won't load and you'll boot with a laggy UI).</li>
+                <li>Select <strong>Enroll MOK</strong> → select <strong>Continue</strong> → select <strong>Yes</strong>.</li>
+                <li>Enter the password you created during terminal installation (characters will not show).</li>
+                <li>Select <strong>Reboot</strong>.</li>
+              </ol>
+            </div>
+          </div>
+
+          <p>Once booted back into Ubuntu, verify the driver is active:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Should show RTX 3060 info and driver version</span>
+<span class="cmd">nvidia-smi</span>
+
+<span class="cmt"># Expected output: NVIDIA-SMI 560.x | Driver 560.x | CUDA 12.x</span></pre>
+          </div>
+          <div class="callout warn">
+            <span class="callout-icon">⚠️</span>
+            <div>If <code>nvidia-smi</code> says "command not found" or shows errors, the signature block is preventing the driver from loading. Run <code>sudo mokutil --import /var/lib/shim-signed/mok/MOK.der</code> to re-trigger enrollment on the next reboot.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">3</div>
+          <div class="step-title">Fix NVIDIA Optimus (hybrid GPU on laptop)</div>
+          <span class="step-badge badge-warn">LAPTOP SPECIFIC</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Legion 5 has hybrid graphics (AMD iGPU + NVIDIA dGPU). You can manage GPU selections via prime-select or native Wayland offloading.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Install NVIDIA prime for manual switching</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y nvidia-prime</span>
+
+<span class="cmt"># Check current GPU mode</span>
+<span class="cmd">prime-select query</span>
+
+<span class="cmt"># For permanent NVIDIA usage (ML compute environments)</span>
+<span class="cmd">sudo prime-select nvidia</span>
+<span class="cmd">sudo reboot</span>
+
+<span class="cmt"># For battery life when coding: use AMD iGPU</span>
+<span class="cmt"># sudo prime-select on-demand</span>
+
+<span class="cmt"># Verify after reboot</span>
+<span class="cmd">nvidia-smi</span>
+<span class="cmd">glxinfo</span> <span class="arg">| grep "OpenGL renderer"</span></pre>
+          </div>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>For training ML models: <code>sudo prime-select nvidia</code>. For regular coding sessions on battery: <code>sudo prime-select on-demand</code> (uses AMD for display, NVIDIA only when needed — saves 1–2h battery life).</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card danger-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">4</div>
+          <div class="step-title">Configure KMS & DRM Mode Setting for Wayland Display Server</div>
+          <span class="step-badge badge-critical">WAYLAND OPTIMIZE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>On hybrid Legion laptops running Ubuntu 26.04 (which is Wayland-only by default), you will experience micro-stutters, external monitor lag over HDMI, or severe gaming FPS drops in Steam/Proton (e.g. Cyberpunk 2077). This is caused by mismatched buffer synchronization between the iGPU (compositor) and dGPU (renderer). Enforcing Kernel Mode Setting (KMS) fixes this.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Edit the GRUB bootloader configuration</span>
+<span class="cmd">sudo nano</span> <span class="arg">/etc/default/grub</span></pre>
+          </div>
+          <p>Find the line starting with <code>GRUB_CMDLINE_LINUX_DEFAULT</code> and append the DRM mode setting command inside the quotes. It should look like this:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">/etc/default/grub</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="str">GRUB_CMDLINE_LINUX_DEFAULT="quiet splash nvidia-drm.modeset=1"</span></pre>
+          </div>
+          <p>Save and exit Nano (<code>Ctrl + O</code>, <code>Enter</code>, <code>Ctrl + X</code>), then rebuild the bootloader config and reboot:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Update GRUB to load the DRM setting at boot</span>
+<span class="cmd">sudo update-grub</span>
+ 
+<span class="cmt"># Reboot the laptop</span>
+<span class="cmd">sudo reboot</span></pre>
+          </div>
+          <p>After rebooting, verify DRM modeset is loaded: <code>cat /sys/module/nvidia_drm/parameters/modeset</code> (should output <code>Y</code>).</p>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">5</div>
+          <div class="step-title">Essential system config</div>
+          <span class="step-badge badge-info">QUALITY OF LIFE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Enable firewall</span>
+<span class="cmd">sudo ufw enable</span>
+<span class="cmd">sudo ufw status</span>
+
+<span class="cmt"># Install useful system tools</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y gparted timeshift vlc net-tools</span>
+
+<span class="cmt"># Set up automatic Timeshift snapshots (like System Restore for Linux)</span>
+<span class="cmt"># Open Timeshift GUI from Apps → configure rsync backups to root partition</span>
+
+<span class="cmt"># Restore SSH keys from phone backup</span>
+<span class="cmt"># Connect phone via USB → File Transfer mode</span>
+<span class="cmd">mkdir</span> <span class="arg">-p ~/.ssh</span>
+<span class="cmt"># Copy from phone mount point to ~/.ssh/</span>
+<span class="cmt"># Then fix permissions (REQUIRED for SSH to work)</span>
+<span class="cmd">chmod</span> <span class="arg">700 ~/.ssh</span>
+<span class="cmd">chmod</span> <span class="arg">600 ~/.ssh/id_ed25519</span>
+<span class="cmd">chmod</span> <span class="arg">644 ~/.ssh/id_ed25519.pub</span>
+<span class="cmd">chmod</span> <span class="arg">644 ~/.ssh/known_hosts</span>
+
+<span class="cmt"># Test GitHub SSH</span>
+<span class="cmd">ssh</span> <span class="arg">-T git@github.com</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PHASE 6 (AI/ML) ── -->
+<div class="phase-content" id="phase-6">
+  <div class="phase-header">
+    <div class="phase-tag">Phase 7</div>
+    <div class="phase-title">🤖 AI/ML Stack — CUDA + PyTorch + Conda</div>
+    <div class="phase-desc">Install CUDA 12.x, cuDNN, Miniconda, PyTorch with GPU support, and all tools needed for your thesis + Scholar-Flow ML work.</div>
+  </div>
+  <div class="content-body">
+
+    <div class="step-group">
+      <div class="step-group-title">CUDA Toolkit Installation</div>
+
+      <div class="step-card danger-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">1</div>
+          <div class="step-title">Install CUDA 12.8 Toolkit</div>
+          <span class="step-badge badge-critical">GPU COMPUTE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="callout warn">
+            <span class="callout-icon">⚠️</span>
+            <div>The CUDA Toolkit version should match what your driver supports. If <code>nvidia-smi</code> shows "CUDA Version: 12.8" or newer, install CUDA 12.8. Do not install CUDA 11.x.</div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Check max supported CUDA version from driver</span>
+<span class="cmd">nvidia-smi</span> <span class="arg">| grep "CUDA Version"</span>
+ 
+<span class="cmt"># Add NVIDIA CUDA repository for Ubuntu 26.04</span>
+<span class="cmd">wget</span> <span class="arg">https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2604/x86_64/cuda-keyring_1.1-1_all.deb</span>
+<span class="cmd">sudo dpkg</span> <span class="arg">-i cuda-keyring_1.1-1_all.deb</span>
+<span class="cmd">sudo apt-get update</span>
+ 
+<span class="cmt"># Install CUDA 12.8 (adjust version if needed)</span>
+<span class="cmd">sudo apt-get install</span> <span class="arg">-y cuda-toolkit-12-8</span>
+ 
+<span class="cmt"># Add CUDA to PATH — add these to ~/.bashrc</span>
+<span class="cmd">echo</span> <span class="str">'export PATH=/usr/local/cuda-12.8/bin:$PATH'</span> <span class="arg">>> ~/.bashrc</span>
+<span class="cmd">echo</span> <span class="str">'export LD_LIBRARY_PATH=/usr/local/cuda-12.8/lib64:$LD_LIBRARY_PATH'</span> <span class="arg">>> ~/.bashrc</span>
+<span class="cmd">source</span> <span class="arg">~/.bashrc</span>
+ 
+<span class="cmt"># Verify CUDA installation</span>
+<span class="cmd">nvcc</span> <span class="arg">--version</span>
+<span class="cmt"># Should show: Cuda compilation tools, release 12.8</span></pre>
+          </div>
+        </div>
+      </div>
+ 
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">2</div>
+          <div class="step-title">Install Miniconda (not Anaconda)</div>
+          <span class="step-badge badge-info">LIGHTER</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Miniconda is the same as Anaconda but without pre-installed packages — installs in ~500MB vs ~5GB.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Download Miniconda installer</span>
+<span class="cmd">wget</span> <span class="arg">https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh</span>
+ 
+<span class="cmt"># Verify download</span>
+<span class="cmd">sha256sum</span> <span class="arg">~/miniconda.sh</span>
+ 
+<span class="cmt"># Install (in batch mode — no interactive prompts)</span>
+<span class="cmd">bash</span> <span class="arg">~/miniconda.sh -b -p $HOME/miniconda3</span>
+ 
+<span class="cmt"># Initialize conda for bash</span>
+<span class="cmd">~/miniconda3/bin/conda</span> <span class="arg">init bash</span>
+<span class="cmd">source</span> <span class="arg">~/.bashrc</span>
+ 
+<span class="cmt"># Verify</span>
+<span class="cmd">conda</span> <span class="arg">--version</span>
+ 
+<span class="cmt"># Disable auto-activate base env (good practice)</span>
+<span class="cmd">conda config</span> <span class="arg">--set auto_activate_base false</span>
+ 
+<span class="cmt"># Clean up installer</span>
+<span class="cmd">rm</span> <span class="arg">~/miniconda.sh</span></pre>
+          </div>
+        </div>
+      </div>
+ 
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">3</div>
+          <div class="step-title">Create ML environment + install PyTorch GPU</div>
+          <span class="step-badge badge-ok">MAIN ENV</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Create dedicated ML environment (Python 3.12 is standard in 2026)</span>
+<span class="cmd">conda create</span> <span class="arg">-n ml python=3.12 -y</span>
+<span class="cmd">conda activate ml</span>
+ 
+<span class="cmt"># Install PyTorch with CUDA support (e.g., cu126 or cu130 depending on driver version)</span>
+<span class="cmt"># Get latest command from: pytorch.org/get-started/locally/</span>
+<span class="cmd">pip install torch torchvision torchaudio</span> <span class="arg">--index-url https://download.pytorch.org/whl/cu126</span>
+ 
+<span class="cmt"># Verify GPU works with PyTorch</span>
+<span class="cmd">python</span> <span class="arg">-c "import torch; print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0))"</span>
+<span class="cmt"># Should print: True</span>
+<span class="cmt"># Should print: NVIDIA GeForce RTX 3060 Laptop GPU</span>
+ 
+<span class="cmt"># Install core ML/NLP packages</span>
+<span class="cmd">pip install</span> <span class="arg">transformers datasets accelerate peft bitsandbytes</span>
+<span class="cmd">pip install</span> <span class="arg">scikit-learn pandas numpy matplotlib seaborn</span>
+<span class="cmd">pip install</span> <span class="arg">jupyterlab ipywidgets tqdm wandb</span>
+<span class="cmd">pip install</span> <span class="arg">sentence-transformers faiss-cpu langchain openai</span></pre>
+          </div>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>For your thesis (sycophancy prevention / multi-agent debate): also install <code>pip install anthropic openai litellm</code> for LLM API access.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">4</div>
+          <div class="step-title">Create Scholar-Flow / full-stack environment</div>
+          <span class="step-badge badge-info">SEPARATE ENV</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Separate conda env for Scholar-Flow backend Python work</span>
+<span class="cmd">conda create</span> <span class="arg">-n dev python=3.11 -y</span>
+<span class="cmd">conda activate dev</span>
+<span class="cmd">pip install</span> <span class="arg">fastapi uvicorn sqlalchemy psycopg2-binary python-dotenv</span>
+
+<span class="cmt"># Export environment for reproducibility</span>
+<span class="cmd">conda activate ml</span>
+<span class="cmd">conda env export</span> <span class="arg">> ~/ml-env.yml</span>
+<span class="cmd">conda activate dev</span>
+<span class="cmd">conda env export</span> <span class="arg">> ~/dev-env.yml</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card warn-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">5</div>
+          <div class="step-title">LenovoLegionLinux Kernel Module — Fan & Thermal Tuning</div>
+          <span class="step-badge badge-warn">LEGION THERMALS</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Running high-compute PyTorch models on the RTX 3060 will spike temperatures up to 90°C+. The generic Linux kernel cannot modify Legion Embedded Controller (EC) fan tables, causing default profiles to thermal-throttle. Compiling this driver enables custom fan curves and direct power profile switching (Quiet/Balanced/Performance).</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Install dependencies for kernel compilation</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y lm-sensors git build-essential dkms</span>
+ 
+<span class="cmt"># Clone the Lenovo Legion Linux kernel driver repository</span>
+<span class="cmd">git clone</span> <span class="arg">https://github.com/johnfanv2/LenovoLegionLinux.git ~/LenovoLegionLinux</span>
+<span class="cmd">cd</span> <span class="arg">~/LenovoLegionLinux</span>
+ 
+<span class="cmt"># Compile and insert the kernel module</span>
+<span class="cmd">sudo make</span> <span class="arg">install</span>
+<span class="cmd">sudo make</span> <span class="arg">reloadmodule</span>
+ 
+<span class="cmt"># Verify sensors are reading temperatures correctly</span>
+<span class="cmd">sensors</span></pre>
+          </div>
+          <p>You can adjust power states (Quiet = 1, Balanced = 2, Performance = 3) directly from the terminal. Example for Quiet Mode to save thermals:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Echo thermal profiles directly to the EC debug node</span>
+<span class="cmd">echo 1</span> <span class="arg">| sudo tee /sys/kernel/debug/legion/thermal_mode</span>
+ 
+<span class="cmt"># Set a GPU power cap at 80W during training (caps temps, minimal perf loss)</span>
+<span class="cmd">sudo nvidia-smi</span> <span class="arg">-pl 80</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PHASE 7 (Dev Stack) ── -->
+<div class="phase-content" id="phase-7">
+  <div class="phase-header">
+    <div class="phase-tag">Phase 8</div>
+    <div class="phase-title">🔗 Full-Stack Dev Stack Setup</div>
+    <div class="phase-desc">Install Node.js, Yarn Berry, Docker, PostgreSQL, VS Code, and everything needed for Scholar-Flow + GradPlanner development on Ubuntu.</div>
+  </div>
+  <div class="content-body">
+
+    <div class="step-group">
+      <div class="step-group-title">Node.js & Package Managers</div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">1</div>
+          <div class="step-title">Install Node.js via NVM (recommended)</div>
+          <span class="step-badge badge-ok">BEST PRACTICE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Install NVM (Node Version Manager)</span>
+<span class="cmd">curl -o-</span> <span class="arg">https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash</span>
+<span class="cmd">source</span> <span class="arg">~/.bashrc</span>
+
+<span class="cmt"># Verify NVM installed</span>
+<span class="cmd">nvm</span> <span class="arg">--version</span>
+
+<span class="cmt"># Install Node.js LTS (22.x for Next.js 16 compatibility)</span>
+<span class="cmd">nvm install</span> <span class="arg">22</span>
+<span class="cmd">nvm use</span> <span class="arg">22</span>
+<span class="cmd">nvm alias default</span> <span class="arg">22</span>
+
+<span class="cmt"># Verify</span>
+<span class="cmd">node</span> <span class="arg">--version</span>  <span class="cmt"># v22.x.x</span>
+<span class="cmd">npm</span> <span class="arg">--version</span>
+
+<span class="cmt"># Enable Corepack for Yarn Berry (Scholar-Flow uses Yarn Berry v4.9.2)</span>
+<span class="cmd">corepack enable</span>
+
+<span class="cmt"># Install Yarn Berry 4.9.2 globally</span>
+<span class="cmd">corepack prepare</span> <span class="arg">yarn@4.9.2 --activate</span>
+<span class="cmd">yarn</span> <span class="arg">--version</span>  <span class="cmt"># Should show 4.9.2</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">2</div>
+          <div class="step-title">Install Docker + Docker Compose</div>
+          <span class="step-badge badge-info">CONTAINERS</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Install Docker Engine (official method, not snap)</span>
+<span class="cmd">sudo apt-get install</span> <span class="arg">-y ca-certificates curl</span>
+<span class="cmd">sudo install</span> <span class="arg">-m 0755 -d /etc/apt/keyrings</span>
+<span class="cmd">sudo curl</span> <span class="arg">-fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc</span>
+<span class="cmd">sudo chmod</span> <span class="arg">a+r /etc/apt/keyrings/docker.asc</span>
+
+<span class="cmd">echo</span> <span class="arg">\
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null</span>
+
+<span class="cmd">sudo apt-get update</span>
+<span class="cmd">sudo apt-get install</span> <span class="arg">-y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin</span>
+
+<span class="cmt"># Add your user to docker group (no sudo needed for docker)</span>
+<span class="cmd">sudo usermod</span> <span class="arg">-aG docker $USER</span>
+<span class="cmd">newgrp docker</span>
+
+<span class="cmt"># Test Docker works</span>
+<span class="cmd">docker run</span> <span class="arg">hello-world</span>
+<span class="cmd">docker compose version</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">3</div>
+          <div class="step-title">Install PostgreSQL + pgvector extension</div>
+          <span class="step-badge badge-info">SCHOLAR-FLOW</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Install PostgreSQL 16</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y postgresql postgresql-contrib</span>
+<span class="cmd">sudo systemctl enable postgresql</span>
+<span class="cmd">sudo systemctl start postgresql</span>
+
+<span class="cmt"># Create a postgres user matching your Linux username</span>
+<span class="cmd">sudo -u postgres createuser</span> <span class="arg">--interactive --pwprompt atikur</span>
+<span class="cmt"># When prompted: add superuser? → y</span>
+
+<span class="cmt"># Install pgvector (for Scholar-Flow semantic search)</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y postgresql-16-pgvector</span>
+
+<span class="cmt"># Verify pgvector works</span>
+<span class="cmd">sudo -u postgres psql</span> <span class="arg">-c "CREATE EXTENSION IF NOT EXISTS vector;"</span>
+
+<span class="cmt"># Install pgAdmin (optional GUI)</span>
+<span class="cmt"># Or use TablePlus / DBeaver</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y pgadmin4</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">4</div>
+          <div class="step-title">Install VS Code + restore extensions</div>
+          <span class="step-badge badge-ok">IDE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Install VS Code via snap (easiest method)</span>
+<span class="cmd">sudo snap install code</span> <span class="arg">--classic</span>
+
+<span class="cmt"># Restore extensions from your backup list</span>
+<span class="cmt"># First, mount phone and navigate to backup</span>
+<span class="cmt"># Then run:</span>
+<span class="cmd">cat</span> <span class="arg">/path/to/phone/LaptopBackup_2026/VSCode_Settings/extensions_list.txt | xargs -L 1 code --install-extension</span>
+
+<span class="cmt"># Copy VS Code settings.json from backup</span>
+<span class="cmd">mkdir</span> <span class="arg">-p ~/.config/Code/User/</span>
+<span class="cmd">cp</span> <span class="arg">/path/to/backup/settings.json ~/.config/Code/User/settings.json</span>
+
+<span class="cmt"># Install Claude Code CLI</span>
+<span class="cmd">npm install</span> <span class="arg">-g @anthropic-ai/claude-code</span>
+
+<span class="cmt"># Install other global tools</span>
+<span class="cmd">npm install</span> <span class="arg">-g turbo typescript ts-node prisma</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">5</div>
+          <div class="step-title">Install Git + restore config</div>
+          <span class="step-badge badge-info">GIT</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Git is pre-installed on Ubuntu, configure it</span>
+<span class="cmd">git config</span> <span class="arg">--global user.name "Atikur Rahman"</span>
+<span class="cmd">git config</span> <span class="arg">--global user.email "your@email.com"</span>
+<span class="cmd">git config</span> <span class="arg">--global core.editor "code --wait"</span>
+<span class="cmd">git config</span> <span class="arg">--global init.defaultBranch main</span>
+
+<span class="cmt"># Test GitHub SSH connection</span>
+<span class="cmd">ssh</span> <span class="arg">-T git@github.com</span>
+<span class="cmt"># Expected: "Hi atik203! You've successfully authenticated..."</span>
+
+<span class="cmt"># Clone your main repos</span>
+<span class="cmd">mkdir</span> <span class="arg">-p ~/Projects</span>
+<span class="cmd">cd</span> <span class="arg">~/Projects</span>
+<span class="cmd">git clone</span> <span class="arg">git@github.com:atik203/scholar-flow.git</span>
+<span class="cmd">git clone</span> <span class="arg">git@github.com:atik203/gradplanner.git</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PHASE 8 (Edge Cases) ── -->
+<div class="phase-content" id="phase-8">
+  <div class="phase-header">
+    <div class="phase-tag">Phase 9</div>
+    <div class="phase-title">🛡️ Edge Cases & Troubleshooting</div>
+    <div class="phase-desc">Every known problem with Legion 5 dual boot, NVIDIA on Linux, and GRUB. Read before you need it — some of these can look catastrophic but have simple fixes.</div>
+  </div>
+  <div class="content-body">
+
+    <div class="step-group">
+      <div class="step-group-title">Boot & Temporal Synchronization</div>
+
+      <div class="step-card danger-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">"Windows Boot Manager" missing from GRUB after install</div>
+          <span class="step-badge badge-critical">COMMON</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>GRUB shows Ubuntu only, no Windows option.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal (Ubuntu)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Update GRUB — it should auto-detect Windows</span>
+<span class="cmd">sudo update-grub</span>
+<span class="cmt"># Look for: "Found Windows Boot Manager on /dev/nvme0n1p1"</span>
+
+<span class="cmt"># If still not found, install os-prober</span>
+<span class="cmd">sudo apt install</span> <span class="arg">os-prober</span>
+
+<span class="cmt"># Edit GRUB config to enable os-prober</span>
+<span class="cmd">sudo nano</span> <span class="arg">/etc/default/grub</span>
+<span class="cmt"># Add this line at the bottom:</span>
+<span class="cmt"># GRUB_DISABLE_OS_PROBER=false</span>
+
+<span class="cmt"># Save (Ctrl+X, Y, Enter) then:</span>
+<span class="cmd">sudo update-grub</span>
+<span class="cmd">sudo reboot</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card warn-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">Windows time is wrong after switching from Ubuntu (Temporal Sync Bug)</div>
+          <span class="step-badge badge-warn">COMMON</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Linux stores the hardware clock (RTC) in UTC format by default, whereas Windows 11 treats the hardware clock as local time. When dual-booting, this discrepancy results in a 6-hour offset (for Dhaka timezone, UTC+6) on every reboot.</p>
+          <div class="callout danger">
+            <span class="callout-icon">🔴</span>
+            <div><strong>Windows 11 24H2 Registry Bug:</strong> The standard registry modification (<code>RealTimeIsUniversal</code>) that forces Windows to use UTC fails to persist across hybrid shutdown and Fast Startup states in Windows 11 24H2. The registry key gets bypassed, resulting in recurring time drift.</div>
+          </div>
+          <p>The only permanent and robust solution is to configure Linux to use the local RTC standard instead, matching Windows' time system.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal (Ubuntu) — Fix on Linux side</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Force Linux to store time in local RTC (aligning with Windows)</span>
+<span class="cmd">sudo timedatectl</span> <span class="arg">set-local-rtc 1 --adjust-system-clock</span>
+
+<span class="cmt"># Verify RTC status</span>
+<span class="cmd">timedatectl</span></pre>
+          </div>
+          <div class="callout info">
+            <span class="callout-icon">ℹ️</span>
+            <div>Look for <code>RTC in local TZ: yes</code> in the output. A warning about local time will appear; this can be safely disregarded for dual-boot setups.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card warn-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">Black screen after Ubuntu boots (NVIDIA issue)</div>
+          <span class="step-badge badge-warn">COMMON</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>GRUB shows, Ubuntu starts loading, then black screen — nothing.</p>
+          <ol>
+            <li>At GRUB menu: press <strong>E</strong> to edit Ubuntu entry</li>
+            <li>Find the line starting with <code>linux</code></li>
+            <li>At the end of that line, before <code>quiet splash</code>, add: <code>nomodeset</code></li>
+            <li>Press <strong>F10</strong> to boot with this option</li>
+            <li>Once in Ubuntu: install NVIDIA driver properly (Step 2 of Phase 6)</li>
+            <li>After driver is installed and rebooted: remove <code>nomodeset</code> (it's only temporary)</li>
+          </ol>
+          <div class="callout info">
+            <span class="callout-icon">ℹ️</span>
+            <div>To remove nomodeset permanently: <code>sudo nano /etc/default/grub</code> → find <code>GRUB_CMDLINE_LINUX_DEFAULT</code> → remove "nomodeset" → <code>sudo update-grub</code></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">GRUB boots to Ubuntu by default — change default to Windows</div>
+          <span class="step-badge badge-info">PREFERENCE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Edit GRUB config</span>
+<span class="cmd">sudo nano</span> <span class="arg">/etc/default/grub</span>
+
+<span class="cmt"># Change GRUB_DEFAULT (0 = first entry = Ubuntu, use "Windows" or entry number)</span>
+<span class="cmt"># Set to 2 if Windows is 3rd in list, or use saved:</span>
+<span class="cmt"># GRUB_DEFAULT=saved</span>
+<span class="cmt"># GRUB_SAVEDEFAULT=true</span>
+
+<span class="cmt"># Change timeout (default 10 seconds)</span>
+<span class="cmt"># GRUB_TIMEOUT=5</span>
+
+<span class="cmt"># Apply changes</span>
+<span class="cmd">sudo update-grub</span>
+
+<span class="cmt"># Or install GRUB Customizer for GUI</span>
+<span class="cmd">sudo apt install</span> <span class="arg">grub-customizer</span></pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="step-group">
+      <div class="step-group-title">Hardware Controllers & Drivers (Wi-Fi, Audio, Touchpad)</div>
+
+      <div class="step-card danger-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">MediaTek MT7921/MT7922 Wi-Fi PCIe Error -5 & Controller Deadlocks</div>
+          <span class="step-badge badge-critical">CRITICAL</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>The MediaTek MT7921 and MT7922 network cards on the Legion 5 are prone to severe PCIe link crashes. Under Linux, this manifests in the system kernel log (<code>dmesg</code>) as:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">dmesg output</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre>mt7921e 0000:04:00.0: ASIC revision: 79220001
+mt7921e 0000:04:00.0: hardware init failed
+mt7921e: probe of 0000:04:00.0 failed with error -5</pre>
+          </div>
+          <p>This PCIe error is caused by a sleep protection register (<code>0x18011100</code>) deadlock where the card is trapped in a low-power S4 state. This is triggered when booting from Windows into Linux while Windows Fast Startup holds an ACPI lock on the PCIe lane.</p>
+          
+          <h4 style="margin: 12px 0 6px; font-size: 13px; color: var(--text);">Resolution Steps:</h4>
+          <ol style="margin-left: 15px; margin-bottom: 12px;">
+            <li><strong>Disable Windows Fast Startup (Mandatory):</strong> Boot into Windows → open <code>powercfg.cpl</code> (Power Options) → click <strong>"Choose what the power buttons do"</strong> → click <strong>"Change settings that are currently unavailable"</strong> → uncheck <strong>"Turn on fast startup"</strong> → click Save Changes.</li>
+            <li><strong>Embedded Controller (EC) Hard Reset:</strong> If the Wi-Fi card is missing entirely from both Windows Device Manager (yellow triangle or Code 45) and Linux <code>lspci</code>, the PCIe lane registers are hard-locked. Shut down the laptop, disconnect the power cord, and hold the power button down for <strong>exactly 60 seconds</strong>. This drains the EC capacitance and forces a fresh hardware enumeration.</li>
+            <li><strong>Stable Firmware Rollback:</strong> If running Linux kernel 6.14/6.16, the default <code>linux-firmware</code> package contains regressions causing command timeouts. Downgrading to the stable <code>20250311-1</code> firmware release resolves this.</li>
+          </ol>
+
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Clone the official linux-firmware tree</span>
+<span class="cmd">git clone</span> <span class="arg">https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git ~/linux-firmware</span>
+<span class="cmd">cd</span> <span class="arg">~/linux-firmware</span>
+
+<span class="cmt"># Copy stable MT7922 firmware binaries</span>
+<span class="cmd">sudo cp</span> <span class="arg">mediatek/WIFI_MT7922_patch_e2_hdr.bin /lib/firmware/mediatek/</span>
+<span class="cmd">sudo cp</span> <span class="arg">mediatek/WIFI_RAM_CODE_MT7922_1_1_hdr.bin /lib/firmware/mediatek/</span>
+
+<span class="cmt"># Rebuild initramfs boot image to pack the drivers</span>
+<span class="cmd">sudo update-initramfs</span> <span class="arg">-u</span></pre>
+          </div>
+
+          <ol start="4" style="margin-left: 15px; margin-bottom: 12px;">
+            <li><strong>Windows Driver Update:</strong> Under Windows 11, upgrade the MediaTek MT7921/MT7922 OEM driver to version <code>3.0.1.1198</code> or later to ensure proper power state transitions during warm reboots.</li>
+          </ol>
+
+          <p style="margin-top: 14px; font-weight: 600; font-size: 12.5px;">Table 2: MediaTek MT7921/MT7922 Wi-Fi Diagnostic Matrix</p>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr><th>Symptom</th><th>dmesg / OS Error</th><th>Root Cause</th><th>Resolution</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Wi-Fi device missing entirely</strong></td>
+                  <td class="mono">lspci shows nothing; Device Manager Code 45</td>
+                  <td>EC controller state machine deadlock due to hardware-level sleep register crash.</td>
+                  <td class="hl">60-Second EC Drain (Unplug power, hold power button for 60s).</td>
+                </tr>
+                <tr>
+                  <td><strong>Driver fails to load on boot</strong></td>
+                  <td class="mono">mt7921e: probe failed with error -5</td>
+                  <td>PCIe sleep protection deadlock (<code>0x18011100</code>) caused by Windows Fast Startup.</td>
+                  <td class="hl">Disable Windows Fast Startup; reboot.</td>
+                </tr>
+                <tr>
+                  <td><strong>Intermittent drops under load</strong></td>
+                  <td class="mono">mt7921e: WMT trigger abort</td>
+                  <td>Power management sleep states (ASPM) conflict on AMD Ryzen platform.</td>
+                  <td class="hl">Disable PCIe ASPM for Wi-Fi card: add <code class="mono">pcie_aspm=off</code> to GRUB command line.</td>
+                </tr>
+                <tr>
+                  <td><strong>Latency spikes / high ping</strong></td>
+                  <td class="mono">Firmware command timeout</td>
+                  <td>Firmware regression in recent kernel package updates.</td>
+                  <td class="hl">Roll back Wi-Fi firmware files to stable version <code class="mono">20250311-1</code>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card warn-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">Realtek ALC287 / ALC3306 Audio: Silent Internal Speakers</div>
+          <span class="step-badge badge-warn">HARDWARE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>The Legion 5 features Realtek ALC287 or ALC3306 audio codecs paired with dual Cirrus Logic CS35L41 smart amplifiers connected via an I2S bus. While Linux successfully registers the ALC chip (enabling headphones and microphone), it fails to route sound signals through the secondary Cirrus Logic amplifier out of the box, resulting in dead silent speakers.</p>
+          
+          <h4 style="margin: 12px 0 6px; font-size: 13px; color: var(--text);">Fix Option 1: Install Cameron Berkenpas / Thiago Tei Firmware Patch (Recommended)</h4>
+          <p>A community-maintained driver patch overrides the ACPI tables to correctly initialize the I2S routing block on boot.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Add community repository for Legion Audio Patches</span>
+<span class="cmd">sudo add-apt-repository</span> <span class="arg">ppa:cameron-berkenpas/legion-audio -y</span>
+<span class="cmd">sudo apt update</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y legion-audio-patch</span>
+
+<span class="cmt"># Reboot to apply the routing fix</span>
+<span class="cmd">sudo reboot</span></pre>
+          </div>
+
+          <h4 style="margin: 12px 0 6px; font-size: 13px; color: var(--text);">Fix Option 2: Suspend State Wake Hack (Zero-install Workaround)</h4>
+          <p>If you prefer not to use a third-party PPA, a hardware initialization bypass exists. Suspending the computer and waking it forces the system BIOS to re-initialize the audio amplifier.</p>
+          <ul style="margin-left: 15px; margin-bottom: 12px;">
+            <li>Close the laptop lid to suspend (enter S3 or modern standby sleep).</li>
+            <li>Wait 5 seconds until the power button LED begins pulsing slowly.</li>
+            <li>Open the lid and wake the computer. The speakers will now work until the next full shutdown.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">I2C HID Touchpad Fails to Initialize or Register Deadlocks</div>
+          <span class="step-badge badge-info">HARDWARE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>The Legion's touchpad runs over an I2C HID bus. It occasionally stops working during warm restarts from Windows or when resuming from a deep sleep state because the I2C controller fails to clear its registers.</p>
+          
+          <h4 style="margin: 12px 0 6px; font-size: 13px; color: var(--text);">Resolution Steps:</h4>
+          <ol style="margin-left: 15px; margin-bottom: 12px;">
+            <li><strong>Kernel Upgrade (HWE):</strong> Upgrade to the latest Hardware Enablement (HWE) kernel, which includes patches for recovering from I2C bus timeouts and touchpad register resets:</li>
+          </ol>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmd">sudo apt update</span>
+<span class="cmd">sudo apt install</span> <span class="arg">--install-recommends linux-generic-hwe-26.04 -y</span></pre>
+          </div>
+
+          <ol start="2" style="margin-left: 15px; margin-bottom: 12px;">
+            <li><strong>Windows Device Manager Power Cycle:</strong> If the touchpad becomes unresponsive in both Windows and Linux, the touchpad's microcontroller has deadlocked. Boot into Windows → open <strong>Device Manager</strong> → expand <strong>Human Interface Devices</strong> → right-click <strong>I2C HID Device</strong> → click <strong>Disable</strong> → wait 3 seconds → click <strong>Enable</strong>. This forces a physical power-cycle code to the touchpad controller, clearing the lock state.</li>
+          </ol>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="step-group">
+      <div class="step-group-title">Power, Thermals & Biometrics</div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">PyTorch says CUDA not available even after install</div>
+          <span class="step-badge badge-warn">ML ISSUE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Diagnose step by step</span>
+<span class="cmd">nvidia-smi</span>                        <span class="cmt"># GPU visible?</span>
+<span class="cmd">nvcc --version</span>                   <span class="cmt"># CUDA compiler present?</span>
+<span class="cmd">python -c "import torch; print(torch.__version__)"</span>  <span class="cmt"># Check torch version</span>
+<span class="cmd">python -c "import torch; print(torch.version.cuda)"</span>  <span class="cmt"># CUDA version PyTorch built with</span>
+ 
+<span class="cmt"># If torch shows CPU only — reinstall with correct CUDA:</span>
+<span class="cmd">pip uninstall</span> <span class="arg">torch torchvision torchaudio -y</span>
+<span class="cmd">pip install torch torchvision torchaudio</span> <span class="arg">--index-url https://download.pytorch.org/whl/cu126</span>
+ 
+<span class="cmt"># Check prime-select — must be nvidia for GPU to be accessible</span>
+<span class="cmd">prime-select query</span>
+<span class="cmt"># If showing 'on-demand' or 'intel', switch to nvidia:</span>
+<span class="cmd">sudo prime-select nvidia</span>
+<span class="cmd">sudo reboot</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card warn-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">Micro-stutters, cursor lag, or window freezes under Wayland</div>
+          <span class="step-badge badge-warn">WAYLAND/NVIDIA</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Since Ubuntu 26.04 is Wayland-only (X11 removed), hybrid GPU displays can experience minor refresh lag or screen freezes under Wayland.</p>
+          <ol style="margin-left: 15px; margin-top: 5px;">
+            <li>Verify you are indeed running on Wayland: <code>echo $XDG_SESSION_TYPE</code> (should return <code>wayland</code>).</li>
+            <li>Ensure the proprietary NVIDIA driver is actually loaded: run <code>nvidia-smi</code>. If it doesn't load, Wayland runs on CPU/software rendering, causing massive lags.</li>
+            <li><strong>Fractional Scaling Stutter:</strong> If you use scale settings like 125% or 150%, Wayland + NVIDIA can stutter on hybrid setups. Try reverting display scale to 100% or 200%.</li>
+            <li><strong>GDM Configuration:</strong> Ensure GDM allows Wayland. Open <code>/etc/gdm3/custom.conf</code> and ensure <code>WaylandEnable=false</code> is fully commented out (prefixed with <code>#</code>).</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="step-card warn-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">Lenovo Legion Fan, Thermals, & Battery Conservation Management</div>
+          <span class="step-badge badge-warn">LEGION SPECIFIC</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Standard Linux power tools fail to interface with Lenovo's proprietary EC (Embedded Controller) profiles. To safeguard battery health and manage thermals during high-compute AI training, configure the following settings:</p>
+          
+          <h4 style="margin: 12px 0 6px; font-size: 13px; color: var(--text);">1. Battery Conservation Mode (Limit charge to 60%)</h4>
+          <p>To prevent battery degradation when the laptop is constantly plugged in, enable conservation mode:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal (Immediate Effect)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Enable conservation mode (limits maximum charge to 60%)</span>
+<span class="cmd">echo 1</span> <span class="arg">| sudo tee /sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode</span></pre>
+          </div>
+          <p>To make this setting persistent across boots, integrate it into TLP:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Install TLP power management daemon</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y tlp</span>
+<span class="cmd">sudo systemctl enable tlp</span> <span class="arg">--now</span>
+
+<span class="cmt"># Write threshold configuration to TLP overrides</span>
+<span class="cmd">echo</span> <span class="arg">"STOP_CHARGE_THRESH_BAT0=60" | sudo tee /etc/tlp.d/01-battery-conservation-mode.conf</span></pre>
+          </div>
+
+          <h4 style="margin: 12px 0 6px; font-size: 13px; color: var(--text);">2. Custom Fan Curves & Power Profiles via LenovoLegionLinux</h4>
+          <p>Standard fan control nodes are hidden on Legion laptops. Compiling this kernel driver exposes the thermal states and power switching profiles:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Install driver prerequisites</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y lm-sensors git build-essential dkms</span>
+
+<span class="cmt"># Clone driver source</span>
+<span class="cmd">git clone</span> <span class="arg">https://github.com/johnfanv2/LenovoLegionLinux.git ~/LenovoLegionLinux</span>
+<span class="cmd">cd</span> <span class="arg">~/LenovoLegionLinux/kernel</span>
+
+<span class="cmt"># Compile and load the kernel module</span>
+<span class="cmd">sudo make</span> <span class="arg">install</span>
+<span class="cmd">sudo modprobe</span> <span class="arg">lenovo-legion-module</span>
+
+<span class="cmt"># Verify sysfs interface is present</span>
+<span class="cmd">ls</span> <span class="arg">/sys/kernel/legion/</span></pre>
+          </div>
+          <p>You can now use `legion_gui` to draw custom fan curves. To switch power profiles directly via terminal (1 = Quiet, 2 = Balanced, 3 = Performance):</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmd">echo 1</span> <span class="arg">| sudo tee /sys/kernel/debug/legion/thermal_mode</span></pre>
+          </div>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>During heavy ML training runs, cap the RTX 3060 power draw to control temperatures: <code>sudo nvidia-smi -pl 80</code> (limits GPU to 80W, reducing thermals with negligible performance loss).</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">Goodix Fingerprint Reader Biometric Configuration</div>
+          <span class="step-badge badge-info">BIOMETRICS</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>The fingerprint reader integrated into the Legion 5's power button is a Goodix Touch OEM Device (TOD). It is not supported by default open-source drivers, but can be enabled using official proprietary wrappers:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Add Linux TOD repository</span>
+<span class="cmd">sudo add-apt-repository</span> <span class="arg">ppa:libfprint-tod1-group/ppa -y</span>
+<span class="cmd">sudo apt update</span>
+
+<span class="cmt"># Install fingerprint driver and PAM module</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y libfprint-2-tod1-goodix fprintd</span>
+
+<span class="cmt"># Restart fprintd service</span>
+<span class="cmd">sudo systemctl restart fprintd</span>
+
+<span class="cmt"># Enroll your fingerprint</span>
+<span class="cmd">fprintd-enroll</span></pre>
+          </div>
+          <p>After successful enrollment, open <strong>GNOME Settings → Users → Fingerprint Login</strong> to enable biometric authentication for screen unlocking and sudo prompt elevation.</p>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">Phone not detected as drive letter in Windows</div>
+          <span class="step-badge badge-info">BACKUP ISSUE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Vivo X300 Pro sometimes only charges and doesn't show as a drive.</p>
+          <ol>
+            <li>Pull down notification shade → Tap "Android System" USB notification</li>
+            <li>Select <strong>"File Transfer"</strong> (not just charging)</li>
+            <li>If no notification: Settings → Additional Settings → Developer Options → USB Configuration → select "File Transfer" (MTP)</li>
+            <li>If Developer Options not visible: Settings → About Phone → tap "Build Number" 7 times</li>
+            <li>Try a different USB cable — many cheap cables don't support data, only power</li>
+            <li>Try USB 3.0 port on the Legion (blue ports)</li>
+          </ol>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>If MTP still fails: use <strong>AirDroid</strong> (free) or <strong>Snapdrop.net</strong> (peer-to-peer, no account) for wireless transfer over your home WiFi. Slower but reliable.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="step-group">
+      <div class="step-group-title">Final Checklist — After Everything Is Done</div>
+
+      <div class="step-card done">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">✓</div>
+          <div class="step-title">Verify complete setup checklist</div>
+          <span class="step-badge badge-ok">DONE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <ul class="checklist">
+            <li>GRUB shows both Ubuntu and Windows Boot Manager</li>
+            <li>Windows boots normally, no BitLocker issues</li>
+            <li>Ubuntu boots with GNOME desktop</li>
+            <li><code>nvidia-smi</code> shows RTX 3060 Laptop GPU</li>
+            <li><code>nvcc --version</code> shows CUDA 12.8</li>
+            <li>PyTorch <code>torch.cuda.is_available()</code> returns True</li>
+            <li>SSH to GitHub works (<code>ssh -T git@github.com</code>)</li>
+            <li>Node.js 22 + Yarn Berry 4.9.2 installed</li>
+            <li>Docker running (<code>docker run hello-world</code>)</li>
+            <li>PostgreSQL + pgvector working</li>
+            <li>E: drive backup verified on phone (file count matches)</li>
+            <li>Timeshift snapshot taken of fresh Ubuntu install</li>
+            <li>Windows C: drive has 65GB+ free after cleanup</li>
+            <li>WSL completely removed from Windows</li>
+            <li>Syncthing configured for ongoing phone sync (optional)</li>
+          </ul>
+          <div class="callout tip">
+            <span class="callout-icon">🎉</span>
+            <div>Once all boxes are checked: run a quick PyTorch training test with your thesis code to confirm end-to-end GPU pipeline works. Then take a Timeshift snapshot labeled "fresh-dev-setup-complete".</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /.main -->
+</div><!-- /.shell -->
+
+<script>
+// ── Tab switching ──
+const phases = document.querySelectorAll('.phase-content');
+const navItems = document.querySelectorAll('.nav-item');
+
+function switchPhase(phaseId, el) {
+  phases.forEach(p => p.classList.remove('active'));
+  navItems.forEach(n => n.classList.remove('active'));
+  document.getElementById(phaseId).classList.add('active');
+  el.classList.add('active');
+  updateProgress(phaseId);
+
+  // Close sidebar on mobile
+  if (window.innerWidth <= 768) {
+    closeSidebar();
+  }
+}
+
+// ── Mobile Sidebar Navigation ──
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  const btn = document.getElementById('menu-btn');
+  
+  sidebar.classList.toggle('open');
+  backdrop.classList.toggle('active');
+  btn.classList.toggle('open');
+}
+
+function closeSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  const btn = document.getElementById('menu-btn');
+  
+  sidebar.classList.remove('open');
+  backdrop.classList.remove('active');
+  btn.classList.remove('open');
+}
+
+function updateProgress(phaseId) {
+  const num = parseInt(phaseId.replace('phase-', ''));
+  const total = phases.length - 1;
+  const pct = Math.round((num / total) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+}
+
+// ── Step expand/collapse ──
+function toggleStep(header) {
+  const card = header.parentElement;
+  card.classList.toggle('open');
+}
+
+// ── Copy code ──
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// Open first step of first phase by default
+document.querySelector('.step-card .step-header').click();
+</script>
+</body>
+</html>
