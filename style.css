@@ -182,6 +182,7 @@ body.no-scroll {
   padding: 0 0 80px;
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .phase-header {
@@ -233,7 +234,6 @@ body.no-scroll {
 
 .content-body {
   padding: 28px 40px;
-  max-width: 1000px;
   width: 100%;
 }
 
@@ -651,6 +651,8 @@ pre {
 
 .phase-content.active {
   display: block;
+  width: 100%;
+  max-width: 1040px;
 }
 
 /* ── Inline code ── */

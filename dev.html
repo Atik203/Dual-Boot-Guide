@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dual Boot Setup Guide — Legion 5</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="mobile-header">
+  <button class="menu-toggle" id="menu-btn" onclick="toggleSidebar()" aria-label="Toggle Navigation" aria-expanded="false">
+    <div class="hamburger-box">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </div>
+  </button>
+  <div class="mobile-brand">Legion 5 · 15ACH6</div>
+  <div style="width: 36px;"></div>
+</header>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar"></nav>
+
+<div class="main">
+
+<!-- ── PHASE 6 (AI/ML) ── -->
+<div class="phase-content" id="phase-6">
+  <div class="phase-header">
+    <div class="phase-tag">Phase 6</div>
+    <div class="phase-title">🤖 AI/ML Stack — CUDA + PyTorch + Conda</div>
+    <div class="phase-desc">Install CUDA 12.x, cuDNN, Miniconda, PyTorch with GPU support, and all tools needed for your thesis + Scholar-Flow ML work.</div>
+  </div>
+  <div class="content-body">
+
+    <div class="step-group">
+      <div class="step-group-title">CUDA Toolkit Installation</div>
+
+      <div class="step-card danger-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">1</div>
+          <div class="step-title">Install CUDA 12.8 Toolkit</div>
+          <span class="step-badge badge-critical">GPU COMPUTE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="callout warn">
+            <span class="callout-icon">⚠️</span>
+            <div>The CUDA Toolkit version should match what your driver supports. If <code>nvidia-smi</code> shows "CUDA Version: 12.8" or newer, install CUDA 12.8. Do not install CUDA 11.x.</div>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Check max supported CUDA version from driver</span>
+<span class="cmd">nvidia-smi</span> <span class="arg">| grep "CUDA Version"</span>
+ 
+<span class="cmt"># Add NVIDIA CUDA repository for Ubuntu 26.04</span>
+<span class="cmd">wget</span> <span class="arg">https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2604/x86_64/cuda-keyring_1.1-1_all.deb</span>
+<span class="cmd">sudo dpkg</span> <span class="arg">-i cuda-keyring_1.1-1_all.deb</span>
+<span class="cmd">sudo apt-get update</span>
+ 
+<span class="cmt"># Install CUDA 12.8 (adjust version if needed)</span>
+<span class="cmd">sudo apt-get install</span> <span class="arg">-y cuda-toolkit-12-8</span>
+ 
+<span class="cmt"># Add CUDA to PATH — add these to ~/.bashrc</span>
+<span class="cmd">echo</span> <span class="str">'export PATH=/usr/local/cuda-12.8/bin:$PATH'</span> <span class="arg">>> ~/.bashrc</span>
+<span class="cmd">echo</span> <span class="str">'export LD_LIBRARY_PATH=/usr/local/cuda-12.8/lib64:$LD_LIBRARY_PATH'</span> <span class="arg">>> ~/.bashrc</span>
+<span class="cmd">source</span> <span class="arg">~/.bashrc</span>
+ 
+<span class="cmt"># Verify CUDA installation</span>
+<span class="cmd">nvcc</span> <span class="arg">--version</span>
+<span class="cmt"># Should show: Cuda compilation tools, release 12.8</span></pre>
+          </div>
+        </div>
+      </div>
+ 
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">2</div>
+          <div class="step-title">Install Miniconda (not Anaconda)</div>
+          <span class="step-badge badge-info">LIGHTER</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Miniconda is the same as Anaconda but without pre-installed packages — installs in ~500MB vs ~5GB.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Download Miniconda installer</span>
+<span class="cmd">wget</span> <span class="arg">https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh</span>
+ 
+<span class="cmt"># Verify download</span>
+<span class="cmd">sha256sum</span> <span class="arg">~/miniconda.sh</span>
+ 
+<span class="cmt"># Install (in batch mode — no interactive prompts)</span>
+<span class="cmd">bash</span> <span class="arg">~/miniconda.sh -b -p $HOME/miniconda3</span>
+ 
+<span class="cmt"># Initialize conda for bash</span>
+<span class="cmd">~/miniconda3/bin/conda</span> <span class="arg">init bash</span>
+<span class="cmd">source</span> <span class="arg">~/.bashrc</span>
+ 
+<span class="cmt"># Verify</span>
+<span class="cmd">conda</span> <span class="arg">--version</span>
+ 
+<span class="cmt"># Disable auto-activate base env (good practice)</span>
+<span class="cmd">conda config</span> <span class="arg">--set auto_activate_base false</span>
+ 
+<span class="cmt"># Clean up installer</span>
+<span class="cmd">rm</span> <span class="arg">~/miniconda.sh</span></pre>
+          </div>
+        </div>
+      </div>
+ 
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">3</div>
+          <div class="step-title">Create ML environment + install PyTorch GPU</div>
+          <span class="step-badge badge-ok">MAIN ENV</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Create dedicated ML environment (Python 3.12 is standard in 2026)</span>
+<span class="cmd">conda create</span> <span class="arg">-n ml python=3.12 -y</span>
+<span class="cmd">conda activate ml</span>
+ 
+<span class="cmt"># Install PyTorch with CUDA support (e.g., cu126 or cu130 depending on driver version)</span>
+<span class="cmt"># Get latest command from: pytorch.org/get-started/locally/</span>
+<span class="cmd">pip install torch torchvision torchaudio</span> <span class="arg">--index-url https://download.pytorch.org/whl/cu126</span>
+ 
+<span class="cmt"># Verify GPU works with PyTorch</span>
+<span class="cmd">python</span> <span class="arg">-c "import torch; print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0))"</span>
+<span class="cmt"># Should print: True</span>
+<span class="cmt"># Should print: NVIDIA GeForce RTX 3060 Laptop GPU</span>
+ 
+<span class="cmt"># Install core ML/NLP packages</span>
+<span class="cmd">pip install</span> <span class="arg">transformers datasets accelerate peft bitsandbytes</span>
+<span class="cmd">pip install</span> <span class="arg">scikit-learn pandas numpy matplotlib seaborn</span>
+<span class="cmd">pip install</span> <span class="arg">jupyterlab ipywidgets tqdm wandb</span>
+<span class="cmd">pip install</span> <span class="arg">sentence-transformers faiss-cpu langchain openai</span></pre>
+          </div>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>For your thesis (sycophancy prevention / multi-agent debate): also install <code>pip install anthropic openai litellm</code> for LLM API access.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">4</div>
+          <div class="step-title">Create Scholar-Flow / full-stack environment</div>
+          <span class="step-badge badge-info">SEPARATE ENV</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Separate conda env for Scholar-Flow backend Python work</span>
+<span class="cmd">conda create</span> <span class="arg">-n dev python=3.11 -y</span>
+<span class="cmd">conda activate dev</span>
+<span class="cmd">pip install</span> <span class="arg">fastapi uvicorn sqlalchemy psycopg2-binary python-dotenv</span>
+
+<span class="cmt"># Export environment for reproducibility</span>
+<span class="cmd">conda activate ml</span>
+<span class="cmd">conda env export</span> <span class="arg">> ~/ml-env.yml</span>
+<span class="cmd">conda activate dev</span>
+<span class="cmd">conda env export</span> <span class="arg">> ~/dev-env.yml</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card warn-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">5</div>
+          <div class="step-title">LenovoLegionLinux Kernel Module — Fan & Thermal Tuning</div>
+          <span class="step-badge badge-warn">LEGION THERMALS</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Running high-compute PyTorch models on the RTX 3060 will spike temperatures up to 90°C+. The generic Linux kernel cannot modify Legion Embedded Controller (EC) fan tables, causing default profiles to thermal-throttle. Compiling this driver enables custom fan curves and direct power profile switching (Quiet/Balanced/Performance).</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Install dependencies for kernel compilation</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y lm-sensors git build-essential dkms</span>
+ 
+<span class="cmt"># Clone the Lenovo Legion Linux kernel driver repository</span>
+<span class="cmd">git clone</span> <span class="arg">https://github.com/johnfanv2/LenovoLegionLinux.git ~/LenovoLegionLinux</span>
+<span class="cmd">cd</span> <span class="arg">~/LenovoLegionLinux</span>
+ 
+<span class="cmt"># Compile and insert the kernel module</span>
+<span class="cmd">sudo make</span> <span class="arg">install</span>
+<span class="cmd">sudo make</span> <span class="arg">reloadmodule</span>
+ 
+<span class="cmt"># Verify sensors are reading temperatures correctly</span>
+<span class="cmd">sensors</span></pre>
+          </div>
+          <p>You can adjust power states (Quiet = 1, Balanced = 2, Performance = 3) directly from the terminal. Example for Quiet Mode to save thermals:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Echo thermal profiles directly to the EC debug node</span>
+<span class="cmd">echo 1</span> <span class="arg">| sudo tee /sys/kernel/debug/legion/thermal_mode</span>
+ 
+<span class="cmt"># Set a GPU power cap at 80W during training (caps temps, minimal perf loss)</span>
+<span class="cmd">sudo nvidia-smi</span> <span class="arg">-pl 80</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PHASE 7 (Dev Stack) ── -->
+<div class="phase-content" id="phase-7">
+  <div class="phase-header">
+    <div class="phase-tag">Phase 7</div>
+    <div class="phase-title">🔗 Full-Stack Dev Stack Setup</div>
+    <div class="phase-desc">Install Node.js, Yarn Berry, Docker, PostgreSQL, VS Code, and everything needed for Scholar-Flow + GradPlanner development on Ubuntu.</div>
+  </div>
+  <div class="content-body">
+
+    <div class="step-group">
+      <div class="step-group-title">Node.js & Package Managers</div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">1</div>
+          <div class="step-title">Install Node.js via NVM (recommended)</div>
+          <span class="step-badge badge-ok">BEST PRACTICE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Install NVM (Node Version Manager)</span>
+<span class="cmd">curl -o-</span> <span class="arg">https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash</span>
+<span class="cmd">source</span> <span class="arg">~/.bashrc</span>
+
+<span class="cmt"># Verify NVM installed</span>
+<span class="cmd">nvm</span> <span class="arg">--version</span>
+
+<span class="cmt"># Install Node.js LTS (22.x for Next.js 16 compatibility)</span>
+<span class="cmd">nvm install</span> <span class="arg">22</span>
+<span class="cmd">nvm use</span> <span class="arg">22</span>
+<span class="cmd">nvm alias default</span> <span class="arg">22</span>
+
+<span class="cmt"># Verify</span>
+<span class="cmd">node</span> <span class="arg">--version</span>  <span class="cmt"># v22.x.x</span>
+<span class="cmd">npm</span> <span class="arg">--version</span>
+
+<span class="cmt"># Enable Corepack for Yarn Berry (Scholar-Flow uses Yarn Berry v4.9.2)</span>
+<span class="cmd">corepack enable</span>
+
+<span class="cmt"># Install Yarn Berry 4.9.2 globally</span>
+<span class="cmd">corepack prepare</span> <span class="arg">yarn@4.9.2 --activate</span>
+<span class="cmd">yarn</span> <span class="arg">--version</span>  <span class="cmt"># Should show 4.9.2</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">2</div>
+          <div class="step-title">Install Docker + Docker Compose</div>
+          <span class="step-badge badge-info">CONTAINERS</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Install Docker Engine (official method, not snap)</span>
+<span class="cmd">sudo apt-get install</span> <span class="arg">-y ca-certificates curl</span>
+<span class="cmd">sudo install</span> <span class="arg">-m 0755 -d /etc/apt/keyrings</span>
+<span class="cmd">sudo curl</span> <span class="arg">-fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc</span>
+<span class="cmd">sudo chmod</span> <span class="arg">a+r /etc/apt/keyrings/docker.asc</span>
+
+<span class="cmd">echo</span> <span class="arg">\
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null</span>
+
+<span class="cmd">sudo apt-get update</span>
+<span class="cmd">sudo apt-get install</span> <span class="arg">-y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin</span>
+
+<span class="cmt"># Add your user to docker group (no sudo needed for docker)</span>
+<span class="cmd">sudo usermod</span> <span class="arg">-aG docker $USER</span>
+<span class="cmd">newgrp docker</span>
+
+<span class="cmt"># Test Docker works</span>
+<span class="cmd">docker run</span> <span class="arg">hello-world</span>
+<span class="cmd">docker compose version</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">3</div>
+          <div class="step-title">Install PostgreSQL + pgvector extension</div>
+          <span class="step-badge badge-info">SCHOLAR-FLOW</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Install PostgreSQL 16</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y postgresql postgresql-contrib</span>
+<span class="cmd">sudo systemctl enable postgresql</span>
+<span class="cmd">sudo systemctl start postgresql</span>
+
+<span class="cmt"># Create a postgres user matching your Linux username</span>
+<span class="cmd">sudo -u postgres createuser</span> <span class="arg">--interactive --pwprompt atikur</span>
+<span class="cmt"># When prompted: add superuser? → y</span>
+
+<span class="cmt"># Install pgvector (for Scholar-Flow semantic search)</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y postgresql-16-pgvector</span>
+
+<span class="cmt"># Verify pgvector works</span>
+<span class="cmd">sudo -u postgres psql</span> <span class="arg">-c "CREATE EXTENSION IF NOT EXISTS vector;"</span>
+
+<span class="cmt"># Install pgAdmin (optional GUI)</span>
+<span class="cmt"># Or use TablePlus / DBeaver</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y pgadmin4</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">4</div>
+          <div class="step-title">Install VS Code + restore extensions</div>
+          <span class="step-badge badge-ok">IDE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Install VS Code via snap (easiest method)</span>
+<span class="cmd">sudo snap install code</span> <span class="arg">--classic</span>
+
+<span class="cmt"># Restore extensions from your backup list</span>
+<span class="cmt"># First, mount phone and navigate to backup</span>
+<span class="cmt"># Then run:</span>
+<span class="cmd">cat</span> <span class="arg">/path/to/phone/LaptopBackup_2026/VSCode_Settings/extensions_list.txt | xargs -L 1 code --install-extension</span>
+
+<span class="cmt"># Copy VS Code settings.json from backup</span>
+<span class="cmd">mkdir</span> <span class="arg">-p ~/.config/Code/User/</span>
+<span class="cmd">cp</span> <span class="arg">/path/to/backup/settings.json ~/.config/Code/User/settings.json</span>
+
+<span class="cmt"># Install Claude Code CLI</span>
+<span class="cmd">npm install</span> <span class="arg">-g @anthropic-ai/claude-code</span>
+
+<span class="cmt"># Install other global tools</span>
+<span class="cmd">npm install</span> <span class="arg">-g turbo typescript ts-node prisma</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">5</div>
+          <div class="step-title">Install Git + restore config</div>
+          <span class="step-badge badge-info">GIT</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Git is pre-installed on Ubuntu, configure it</span>
+<span class="cmd">git config</span> <span class="arg">--global user.name "Atikur Rahman"</span>
+<span class="cmd">git config</span> <span class="arg">--global user.email "your@email.com"</span>
+<span class="cmd">git config</span> <span class="arg">--global core.editor "code --wait"</span>
+<span class="cmd">git config</span> <span class="arg">--global init.defaultBranch main</span>
+
+<span class="cmt"># Test GitHub SSH connection</span>
+<span class="cmd">ssh</span> <span class="arg">-T git@github.com</span>
+<span class="cmt"># Expected: "Hi atik203! You've successfully authenticated..."</span>
+
+<span class="cmt"># Clone your main repos</span>
+<span class="cmd">mkdir</span> <span class="arg">-p ~/Projects</span>
+<span class="cmd">cd</span> <span class="arg">~/Projects</span>
+<span class="cmd">git clone</span> <span class="arg">git@github.com:atik203/scholar-flow.git</span>
+<span class="cmd">git clone</span> <span class="arg">git@github.com:atik203/gradplanner.git</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /.main -->
+</div><!-- /.shell -->
+
+<script src="app.js"></script>
+</body>
+</html>

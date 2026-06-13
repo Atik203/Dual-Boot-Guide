@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dual Boot Setup Guide — Legion 5</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="mobile-header">
+  <button class="menu-toggle" id="menu-btn" onclick="toggleSidebar()" aria-label="Toggle Navigation" aria-expanded="false">
+    <div class="hamburger-box">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </div>
+  </button>
+  <div class="mobile-brand">Legion 5 · 15ACH6</div>
+  <div style="width: 36px;"></div>
+</header>
+
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
+
+<div class="shell">
+<nav class="sidebar" id="sidebar"></nav>
+
+<div class="main">
+
+<!-- ── PHASE 8 (Edge Cases) ── -->
+<div class="phase-content" id="phase-8">
+  <div class="phase-header">
+    <div class="phase-tag">Phase 8</div>
+    <div class="phase-title">🛡️ Edge Cases & Troubleshooting</div>
+    <div class="phase-desc">Every known problem with Legion 5 dual boot, NVIDIA on Linux, and GRUB. Read before you need it — some of these can look catastrophic but have simple fixes.</div>
+  </div>
+  <div class="content-body">
+
+    <div class="step-group">
+      <div class="step-group-title">Boot & Temporal Synchronization</div>
+
+      <div class="step-card danger-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">"Windows Boot Manager" missing from GRUB after install</div>
+          <span class="step-badge badge-critical">COMMON</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>GRUB shows Ubuntu only, no Windows option.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal (Ubuntu)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Update GRUB — it should auto-detect Windows</span>
+<span class="cmd">sudo update-grub</span>
+<span class="cmt"># Look for: "Found Windows Boot Manager on /dev/nvme0n1p1"</span>
+
+<span class="cmt"># If still not found, install os-prober</span>
+<span class="cmd">sudo apt install</span> <span class="arg">os-prober</span>
+
+<span class="cmt"># Edit GRUB config to enable os-prober</span>
+<span class="cmd">sudo nano</span> <span class="arg">/etc/default/grub</span>
+<span class="cmt"># Add this line at the bottom:</span>
+<span class="cmt"># GRUB_DISABLE_OS_PROBER=false</span>
+
+<span class="cmt"># Save (Ctrl+X, Y, Enter) then:</span>
+<span class="cmd">sudo update-grub</span>
+<span class="cmd">sudo reboot</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card warn-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">Windows time is wrong after switching from Ubuntu (Temporal Sync Bug)</div>
+          <span class="step-badge badge-warn">COMMON</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Linux stores the hardware clock (RTC) in UTC format by default, whereas Windows 11 treats the hardware clock as local time. When dual-booting, this discrepancy results in a 6-hour offset (for Dhaka timezone, UTC+6) on every reboot.</p>
+          <div class="callout danger">
+            <span class="callout-icon">🔴</span>
+            <div><strong>Windows 11 24H2 Registry Bug:</strong> The standard registry modification (<code>RealTimeIsUniversal</code>) that forces Windows to use UTC fails to persist across hybrid shutdown and Fast Startup states in Windows 11 24H2. The registry key gets bypassed, resulting in recurring time drift.</div>
+          </div>
+          <p>The only permanent and robust solution is to configure Linux to use the local RTC standard instead, matching Windows' time system.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal (Ubuntu) — Fix on Linux side</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Force Linux to store time in local RTC (aligning with Windows)</span>
+<span class="cmd">sudo timedatectl</span> <span class="arg">set-local-rtc 1 --adjust-system-clock</span>
+
+<span class="cmt"># Verify RTC status</span>
+<span class="cmd">timedatectl</span></pre>
+          </div>
+          <div class="callout info">
+            <span class="callout-icon">ℹ️</span>
+            <div>Look for <code>RTC in local TZ: yes</code> in the output. A warning about local time will appear; this can be safely disregarded for dual-boot setups.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card warn-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">Black screen after Ubuntu boots (NVIDIA issue)</div>
+          <span class="step-badge badge-warn">COMMON</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>GRUB shows, Ubuntu starts loading, then black screen — nothing.</p>
+          <ol>
+            <li>At GRUB menu: press <strong>E</strong> to edit Ubuntu entry</li>
+            <li>Find the line starting with <code>linux</code></li>
+            <li>At the end of that line, before <code>quiet splash</code>, add: <code>nomodeset</code></li>
+            <li>Press <strong>F10</strong> to boot with this option</li>
+            <li>Once in Ubuntu: install NVIDIA driver properly (Step 2 of Phase 6)</li>
+            <li>After driver is installed and rebooted: remove <code>nomodeset</code> (it's only temporary)</li>
+          </ol>
+          <div class="callout info">
+            <span class="callout-icon">ℹ️</span>
+            <div>To remove nomodeset permanently: <code>sudo nano /etc/default/grub</code> → find <code>GRUB_CMDLINE_LINUX_DEFAULT</code> → remove "nomodeset" → <code>sudo update-grub</code></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">GRUB boots to Ubuntu by default — change default to Windows</div>
+          <span class="step-badge badge-info">PREFERENCE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Edit GRUB config</span>
+<span class="cmd">sudo nano</span> <span class="arg">/etc/default/grub</span>
+
+<span class="cmt"># Change GRUB_DEFAULT (0 = first entry = Ubuntu, use "Windows" or entry number)</span>
+<span class="cmt"># Set to 2 if Windows is 3rd in list, or use saved:</span>
+<span class="cmt"># GRUB_DEFAULT=saved</span>
+<span class="cmt"># GRUB_SAVEDEFAULT=true</span>
+
+<span class="cmt"># Change timeout (default 10 seconds)</span>
+<span class="cmt"># GRUB_TIMEOUT=5</span>
+
+<span class="cmt"># Apply changes</span>
+<span class="cmd">sudo update-grub</span>
+
+<span class="cmt"># Or install GRUB Customizer for GUI</span>
+<span class="cmd">sudo apt install</span> <span class="arg">grub-customizer</span></pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="step-group">
+      <div class="step-group-title">Hardware Controllers & Drivers (Wi-Fi, Audio, Touchpad)</div>
+
+      <div class="step-card danger-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">MediaTek MT7921/MT7922 Wi-Fi PCIe Error -5 & Controller Deadlocks</div>
+          <span class="step-badge badge-critical">CRITICAL</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>The MediaTek MT7921 and MT7922 network cards on the Legion 5 are prone to severe PCIe link crashes. Under Linux, this manifests in the system kernel log (<code>dmesg</code>) as:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">dmesg output</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre>mt7921e 0000:04:00.0: ASIC revision: 79220001
+mt7921e 0000:04:00.0: hardware init failed
+mt7921e: probe of 0000:04:00.0 failed with error -5</pre>
+          </div>
+          <p>This PCIe error is caused by a sleep protection register (<code>0x18011100</code>) deadlock where the card is trapped in a low-power S4 state. This is triggered when booting from Windows into Linux while Windows Fast Startup holds an ACPI lock on the PCIe lane.</p>
+          
+          <h4 style="margin: 12px 0 6px; font-size: 13px; color: var(--text);">Resolution Steps:</h4>
+          <ol style="margin-left: 15px; margin-bottom: 12px;">
+            <li><strong>Disable Windows Fast Startup (Mandatory):</strong> Boot into Windows → open <code>powercfg.cpl</code> (Power Options) → click <strong>"Choose what the power buttons do"</strong> → click <strong>"Change settings that are currently unavailable"</strong> → uncheck <strong>"Turn on fast startup"</strong> → click Save Changes.</li>
+            <li><strong>Embedded Controller (EC) Hard Reset:</strong> If the Wi-Fi card is missing entirely from both Windows Device Manager (yellow triangle or Code 45) and Linux <code>lspci</code>, the PCIe lane registers are hard-locked. Shut down the laptop, disconnect the power cord, and hold the power button down for <strong>exactly 60 seconds</strong>. This drains the EC capacitance and forces a fresh hardware enumeration.</li>
+            <li><strong>Stable Firmware Rollback:</strong> If running Linux kernel 6.14/6.16, the default <code>linux-firmware</code> package contains regressions causing command timeouts. Downgrading to the stable <code>20250311-1</code> firmware release resolves this.</li>
+          </ol>
+
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Clone the official linux-firmware tree</span>
+<span class="cmd">git clone</span> <span class="arg">https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git ~/linux-firmware</span>
+<span class="cmd">cd</span> <span class="arg">~/linux-firmware</span>
+
+<span class="cmt"># Copy stable MT7922 firmware binaries</span>
+<span class="cmd">sudo cp</span> <span class="arg">mediatek/WIFI_MT7922_patch_e2_hdr.bin /lib/firmware/mediatek/</span>
+<span class="cmd">sudo cp</span> <span class="arg">mediatek/WIFI_RAM_CODE_MT7922_1_1_hdr.bin /lib/firmware/mediatek/</span>
+
+<span class="cmt"># Rebuild initramfs boot image to pack the drivers</span>
+<span class="cmd">sudo update-initramfs</span> <span class="arg">-u</span></pre>
+          </div>
+
+          <ol start="4" style="margin-left: 15px; margin-bottom: 12px;">
+            <li><strong>Windows Driver Update:</strong> Under Windows 11, upgrade the MediaTek MT7921/MT7922 OEM driver to version <code>3.0.1.1198</code> or later to ensure proper power state transitions during warm reboots.</li>
+          </ol>
+
+          <p style="margin-top: 14px; font-weight: 600; font-size: 12.5px;">Table 2: MediaTek MT7921/MT7922 Wi-Fi Diagnostic Matrix</p>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr><th>Symptom</th><th>dmesg / OS Error</th><th>Root Cause</th><th>Resolution</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Wi-Fi device missing entirely</strong></td>
+                  <td class="mono">lspci shows nothing; Device Manager Code 45</td>
+                  <td>EC controller state machine deadlock due to hardware-level sleep register crash.</td>
+                  <td class="hl">60-Second EC Drain (Unplug power, hold power button for 60s).</td>
+                </tr>
+                <tr>
+                  <td><strong>Driver fails to load on boot</strong></td>
+                  <td class="mono">mt7921e: probe failed with error -5</td>
+                  <td>PCIe sleep protection deadlock (<code>0x18011100</code>) caused by Windows Fast Startup.</td>
+                  <td class="hl">Disable Windows Fast Startup; reboot.</td>
+                </tr>
+                <tr>
+                  <td><strong>Intermittent drops under load</strong></td>
+                  <td class="mono">mt7921e: WMT trigger abort</td>
+                  <td>Power management sleep states (ASPM) conflict on AMD Ryzen platform.</td>
+                  <td class="hl">Disable PCIe ASPM for Wi-Fi card: add <code class="mono">pcie_aspm=off</code> to GRUB command line.</td>
+                </tr>
+                <tr>
+                  <td><strong>Latency spikes / high ping</strong></td>
+                  <td class="mono">Firmware command timeout</td>
+                  <td>Firmware regression in recent kernel package updates.</td>
+                  <td class="hl">Roll back Wi-Fi firmware files to stable version <code class="mono">20250311-1</code>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card warn-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">Realtek ALC287 / ALC3306 Audio: Silent Internal Speakers</div>
+          <span class="step-badge badge-warn">HARDWARE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>The Legion 5 features Realtek ALC287 or ALC3306 audio codecs paired with dual Cirrus Logic CS35L41 smart amplifiers connected via an I2S bus. While Linux successfully registers the ALC chip (enabling headphones and microphone), it fails to route sound signals through the secondary Cirrus Logic amplifier out of the box, resulting in dead silent speakers.</p>
+          
+          <h4 style="margin: 12px 0 6px; font-size: 13px; color: var(--text);">Fix Option 1: Install Cameron Berkenpas / Thiago Tei Firmware Patch (Recommended)</h4>
+          <p>A community-maintained driver patch overrides the ACPI tables to correctly initialize the I2S routing block on boot.</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Add community repository for Legion Audio Patches</span>
+<span class="cmd">sudo add-apt-repository</span> <span class="arg">ppa:cameron-berkenpas/legion-audio -y</span>
+<span class="cmd">sudo apt update</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y legion-audio-patch</span>
+
+<span class="cmt"># Reboot to apply the routing fix</span>
+<span class="cmd">sudo reboot</span></pre>
+          </div>
+
+          <h4 style="margin: 12px 0 6px; font-size: 13px; color: var(--text);">Fix Option 2: Suspend State Wake Hack (Zero-install Workaround)</h4>
+          <p>If you prefer not to use a third-party PPA, a hardware initialization bypass exists. Suspending the computer and waking it forces the system BIOS to re-initialize the audio amplifier.</p>
+          <ul style="margin-left: 15px; margin-bottom: 12px;">
+            <li>Close the laptop lid to suspend (enter S3 or modern standby sleep).</li>
+            <li>Wait 5 seconds until the power button LED begins pulsing slowly.</li>
+            <li>Open the lid and wake the computer. The speakers will now work until the next full shutdown.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">I2C HID Touchpad Fails to Initialize or Register Deadlocks</div>
+          <span class="step-badge badge-info">HARDWARE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>The Legion's touchpad runs over an I2C HID bus. It occasionally stops working during warm restarts from Windows or when resuming from a deep sleep state because the I2C controller fails to clear its registers.</p>
+          
+          <h4 style="margin: 12px 0 6px; font-size: 13px; color: var(--text);">Resolution Steps:</h4>
+          <ol style="margin-left: 15px; margin-bottom: 12px;">
+            <li><strong>Kernel Upgrade (HWE):</strong> Upgrade to the latest Hardware Enablement (HWE) kernel, which includes patches for recovering from I2C bus timeouts and touchpad register resets:</li>
+          </ol>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmd">sudo apt update</span>
+<span class="cmd">sudo apt install</span> <span class="arg">--install-recommends linux-generic-hwe-26.04 -y</span></pre>
+          </div>
+
+          <ol start="2" style="margin-left: 15px; margin-bottom: 12px;">
+            <li><strong>Windows Device Manager Power Cycle:</strong> If the touchpad becomes unresponsive in both Windows and Linux, the touchpad's microcontroller has deadlocked. Boot into Windows → open <strong>Device Manager</strong> → expand <strong>Human Interface Devices</strong> → right-click <strong>I2C HID Device</strong> → click <strong>Disable</strong> → wait 3 seconds → click <strong>Enable</strong>. This forces a physical power-cycle code to the touchpad controller, clearing the lock state.</li>
+          </ol>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="step-group">
+      <div class="step-group-title">Power, Thermals & Biometrics</div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">PyTorch says CUDA not available even after install</div>
+          <span class="step-badge badge-warn">ML ISSUE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Diagnose step by step</span>
+<span class="cmd">nvidia-smi</span>                        <span class="cmt"># GPU visible?</span>
+<span class="cmd">nvcc --version</span>                   <span class="cmt"># CUDA compiler present?</span>
+<span class="cmd">python -c "import torch; print(torch.__version__)"</span>  <span class="cmt"># Check torch version</span>
+<span class="cmd">python -c "import torch; print(torch.version.cuda)"</span>  <span class="cmt"># CUDA version PyTorch built with</span>
+ 
+<span class="cmt"># If torch shows CPU only — reinstall with correct CUDA:</span>
+<span class="cmd">pip uninstall</span> <span class="arg">torch torchvision torchaudio -y</span>
+<span class="cmd">pip install torch torchvision torchaudio</span> <span class="arg">--index-url https://download.pytorch.org/whl/cu126</span>
+ 
+<span class="cmt"># Check prime-select — must be nvidia for GPU to be accessible</span>
+<span class="cmd">prime-select query</span>
+<span class="cmt"># If showing 'on-demand' or 'intel', switch to nvidia:</span>
+<span class="cmd">sudo prime-select nvidia</span>
+<span class="cmd">sudo reboot</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card warn-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">Micro-stutters, cursor lag, or window freezes under Wayland</div>
+          <span class="step-badge badge-warn">WAYLAND/NVIDIA</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Since Ubuntu 26.04 is Wayland-only (X11 removed), hybrid GPU displays can experience minor refresh lag or screen freezes under Wayland.</p>
+          <ol style="margin-left: 15px; margin-top: 5px;">
+            <li>Verify you are indeed running on Wayland: <code>echo $XDG_SESSION_TYPE</code> (should return <code>wayland</code>).</li>
+            <li>Ensure the proprietary NVIDIA driver is actually loaded: run <code>nvidia-smi</code>. If it doesn't load, Wayland runs on CPU/software rendering, causing massive lags.</li>
+            <li><strong>Fractional Scaling Stutter:</strong> If you use scale settings like 125% or 150%, Wayland + NVIDIA can stutter on hybrid setups. Try reverting display scale to 100% or 200%.</li>
+            <li><strong>GDM Configuration:</strong> Ensure GDM allows Wayland. Open <code>/etc/gdm3/custom.conf</code> and ensure <code>WaylandEnable=false</code> is fully commented out (prefixed with <code>#</code>).</li>
+          </ol>
+        </div>
+      </div>
+
+      <div class="step-card warn-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">Lenovo Legion Fan, Thermals, & Battery Conservation Management</div>
+          <span class="step-badge badge-warn">LEGION SPECIFIC</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Standard Linux power tools fail to interface with Lenovo's proprietary EC (Embedded Controller) profiles. To safeguard battery health and manage thermals during high-compute AI training, configure the following settings:</p>
+          
+          <h4 style="margin: 12px 0 6px; font-size: 13px; color: var(--text);">1. Battery Conservation Mode (Limit charge to 60%)</h4>
+          <p>To prevent battery degradation when the laptop is constantly plugged in, enable conservation mode:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal (Immediate Effect)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Enable conservation mode (limits maximum charge to 60%)</span>
+<span class="cmd">echo 1</span> <span class="arg">| sudo tee /sys/bus/platform/drivers/ideapad_acpi/VPC2004:00/conservation_mode</span></pre>
+          </div>
+          <p>To make this setting persistent across boots, integrate it into TLP:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Install TLP power management daemon</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y tlp</span>
+<span class="cmd">sudo systemctl enable tlp</span> <span class="arg">--now</span>
+
+<span class="cmt"># Write threshold configuration to TLP overrides</span>
+<span class="cmd">echo</span> <span class="arg">"STOP_CHARGE_THRESH_BAT0=60" | sudo tee /etc/tlp.d/01-battery-conservation-mode.conf</span></pre>
+          </div>
+
+          <h4 style="margin: 12px 0 6px; font-size: 13px; color: var(--text);">2. Custom Fan Curves & Power Profiles via LenovoLegionLinux</h4>
+          <p>Standard fan control nodes are hidden on Legion laptops. Compiling this kernel driver exposes the thermal states and power switching profiles:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Install driver prerequisites</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y lm-sensors git build-essential dkms</span>
+
+<span class="cmt"># Clone driver source</span>
+<span class="cmd">git clone</span> <span class="arg">https://github.com/johnfanv2/LenovoLegionLinux.git ~/LenovoLegionLinux</span>
+<span class="cmd">cd</span> <span class="arg">~/LenovoLegionLinux/kernel</span>
+
+<span class="cmt"># Compile and load the kernel module</span>
+<span class="cmd">sudo make</span> <span class="arg">install</span>
+<span class="cmd">sudo modprobe</span> <span class="arg">lenovo-legion-module</span>
+
+<span class="cmt"># Verify sysfs interface is present</span>
+<span class="cmd">ls</span> <span class="arg">/sys/kernel/legion/</span></pre>
+          </div>
+          <p>You can now use `legion_gui` to draw custom fan curves. To switch power profiles directly via terminal (1 = Quiet, 2 = Balanced, 3 = Performance):</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmd">echo 1</span> <span class="arg">| sudo tee /sys/kernel/debug/legion/thermal_mode</span></pre>
+          </div>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>During heavy ML training runs, cap the RTX 3060 power draw to control temperatures: <code>sudo nvidia-smi -pl 80</code> (limits GPU to 80W, reducing thermals with negligible performance loss).</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">Goodix Fingerprint Reader Biometric Configuration</div>
+          <span class="step-badge badge-info">BIOMETRICS</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>The fingerprint reader integrated into the Legion 5's power button is a Goodix Touch OEM Device (TOD). It is not supported by default open-source drivers, but can be enabled using official proprietary wrappers:</p>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Add Linux TOD repository</span>
+<span class="cmd">sudo add-apt-repository</span> <span class="arg">ppa:libfprint-tod1-group/ppa -y</span>
+<span class="cmd">sudo apt update</span>
+
+<span class="cmt"># Install fingerprint driver and PAM module</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y libfprint-2-tod1-goodix fprintd</span>
+
+<span class="cmt"># Restart fprintd service</span>
+<span class="cmd">sudo systemctl restart fprintd</span>
+
+<span class="cmt"># Enroll your fingerprint</span>
+<span class="cmd">fprintd-enroll</span></pre>
+          </div>
+          <p>After successful enrollment, open <strong>GNOME Settings → Users → Fingerprint Login</strong> to enable biometric authentication for screen unlocking and sudo prompt elevation.</p>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">⚠</div>
+          <div class="step-title">Phone not detected as drive letter in Windows</div>
+          <span class="step-badge badge-info">BACKUP ISSUE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <p>Vivo X300 Pro sometimes only charges and doesn't show as a drive.</p>
+          <ol>
+            <li>Pull down notification shade → Tap "Android System" USB notification</li>
+            <li>Select <strong>"File Transfer"</strong> (not just charging)</li>
+            <li>If no notification: Settings → Additional Settings → Developer Options → USB Configuration → select "File Transfer" (MTP)</li>
+            <li>If Developer Options not visible: Settings → About Phone → tap "Build Number" 7 times</li>
+            <li>Try a different USB cable — many cheap cables don't support data, only power</li>
+            <li>Try USB 3.0 port on the Legion (blue ports)</li>
+          </ol>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>If MTP still fails: use <strong>AirDroid</strong> (free) or <strong>Snapdrop.net</strong> (peer-to-peer, no account) for wireless transfer over your home WiFi. Slower but reliable.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="step-group">
+      <div class="step-group-title">Final Checklist — After Everything Is Done</div>
+
+      <div class="step-card done">
+        <div class="step-header" onclick="toggleStep(this)">
+          <div class="step-num">✓</div>
+          <div class="step-title">Verify complete setup checklist</div>
+          <span class="step-badge badge-ok">DONE</span>
+          <span class="step-chevron">▶</span>
+        </div>
+        <div class="step-body">
+          <ul class="checklist">
+            <li>GRUB shows both Ubuntu and Windows Boot Manager</li>
+            <li>Windows boots normally, no BitLocker issues</li>
+            <li>Ubuntu boots with GNOME desktop</li>
+            <li><code>nvidia-smi</code> shows RTX 3060 Laptop GPU</li>
+            <li><code>nvcc --version</code> shows CUDA 12.8</li>
+            <li>PyTorch <code>torch.cuda.is_available()</code> returns True</li>
+            <li>SSH to GitHub works (<code>ssh -T git@github.com</code>)</li>
+            <li>Node.js 22 + Yarn Berry 4.9.2 installed</li>
+            <li>Docker running (<code>docker run hello-world</code>)</li>
+            <li>PostgreSQL + pgvector working</li>
+            <li>E: drive backup verified on phone (file count matches)</li>
+            <li>Timeshift snapshot taken of fresh Ubuntu install</li>
+            <li>Windows C: drive has 65GB+ free after cleanup</li>
+            <li>WSL completely removed from Windows</li>
+            <li>Syncthing configured for ongoing phone sync (optional)</li>
+          </ul>
+          <div class="callout tip">
+            <span class="callout-icon">🎉</span>
+            <div>Once all boxes are checked: run a quick PyTorch training test with your thesis code to confirm end-to-end GPU pipeline works. Then take a Timeshift snapshot labeled "fresh-dev-setup-complete".</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /.main -->
+</div><!-- /.shell -->
+
+<script src="app.js"></script>
+</body>
+</html>
