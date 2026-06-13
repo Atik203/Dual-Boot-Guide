@@ -156,82 +156,21 @@
     <div class="step-group">
       <div class="step-group-title">Hardware Controllers & Drivers (Wi-Fi, Audio, Touchpad)</div>
 
-      <div class="step-card danger-card">
+      <div class="step-card ok-card">
         <div class="step-header" onclick="toggleStep(this)">
-          <div class="step-num">⚠</div>
-          <div class="step-title">MediaTek MT7921/MT7922 Wi-Fi PCIe Error -5 & Controller Deadlocks</div>
-          <span class="step-badge badge-critical">CRITICAL</span>
+          <div class="step-num">✓</div>
+          <div class="step-title">Intel AX200 160MHz — no issues expected</div>
+          <span class="step-badge badge-ok">WORKS OOTB</span>
           <span class="step-chevron">▶</span>
         </div>
         <div class="step-body">
-          <p>The MediaTek MT7921 and MT7922 network cards on the Legion 5 are prone to severe PCIe link crashes. Under Linux, this manifests in the system kernel log (<code>dmesg</code>) as:</p>
-          <div class="code-block">
-            <div class="code-header"><span class="code-lang">dmesg output</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
-            <pre>mt7921e 0000:04:00.0: ASIC revision: 79220001
-mt7921e 0000:04:00.0: hardware init failed
-mt7921e: probe of 0000:04:00.0 failed with error -5</pre>
-          </div>
-          <p>This PCIe error is caused by a sleep protection register (<code>0x18011100</code>) deadlock where the card is trapped in a low-power S4 state. This is triggered when booting from Windows into Linux while Windows Fast Startup holds an ACPI lock on the PCIe lane.</p>
-          
-          <h4 style="margin: 12px 0 6px; font-size: 13px; color: var(--text);">Resolution Steps:</h4>
-          <ol style="margin-left: 15px; margin-bottom: 12px;">
-            <li><strong>Disable Windows Fast Startup (Mandatory):</strong> Boot into Windows → open <code>powercfg.cpl</code> (Power Options) → click <strong>"Choose what the power buttons do"</strong> → click <strong>"Change settings that are currently unavailable"</strong> → uncheck <strong>"Turn on fast startup"</strong> → click Save Changes.</li>
-            <li><strong>Embedded Controller (EC) Hard Reset:</strong> If the Wi-Fi card is missing entirely from both Windows Device Manager (yellow triangle or Code 45) and Linux <code>lspci</code>, the PCIe lane registers are hard-locked. Shut down the laptop, disconnect the power cord, and hold the power button down for <strong>exactly 60 seconds</strong>. This drains the EC capacitance and forces a fresh hardware enumeration.</li>
-            <li><strong>Stable Firmware Rollback:</strong> If running Linux kernel 6.14/6.16, the default <code>linux-firmware</code> package contains regressions causing command timeouts. Downgrading to the stable <code>20250311-1</code> firmware release resolves this.</li>
+          <p>The Intel AX200 is fully supported by the mainline Linux kernel (<code>iwlwifi</code> driver) and works out of the box on Ubuntu 26.04. It supports 2.4/5/6GHz bands, Bluetooth 5.2, and 160MHz channel width. No manual firmware or driver installation needed.</p>
+          <p>If Wi-Fi doesn't appear after install, verify:</p>
+          <ol style="margin-left: 15px;">
+            <li>Hardware switch is on — some Legion 5 models have an Fn+F8 (Airplane mode) toggle</li>
+            <li>No RF kill: <code>rfkill list</code> — if blocked, run <code>rfkill unblock wifi</code></li>
+            <li>Driver loaded: <code>lsmod | grep iwlwifi</code> should show the module</li>
           </ol>
-
-          <div class="code-block">
-            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
-            <pre><span class="cmt"># Clone the official linux-firmware tree</span>
-<span class="cmd">git clone</span> <span class="arg">https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git ~/linux-firmware</span>
-<span class="cmd">cd</span> <span class="arg">~/linux-firmware</span>
-
-<span class="cmt"># Copy stable MT7922 firmware binaries</span>
-<span class="cmd">sudo cp</span> <span class="arg">mediatek/WIFI_MT7922_patch_e2_hdr.bin /lib/firmware/mediatek/</span>
-<span class="cmd">sudo cp</span> <span class="arg">mediatek/WIFI_RAM_CODE_MT7922_1_1_hdr.bin /lib/firmware/mediatek/</span>
-
-<span class="cmt"># Rebuild initramfs boot image to pack the drivers</span>
-<span class="cmd">sudo update-initramfs</span> <span class="arg">-u</span></pre>
-          </div>
-
-          <ol start="4" style="margin-left: 15px; margin-bottom: 12px;">
-            <li><strong>Windows Driver Update:</strong> Under Windows 11, upgrade the MediaTek MT7921/MT7922 OEM driver to version <code>3.0.1.1198</code> or later to ensure proper power state transitions during warm reboots.</li>
-          </ol>
-
-          <p style="margin-top: 14px; font-weight: 600; font-size: 12.5px;">Table 2: MediaTek MT7921/MT7922 Wi-Fi Diagnostic Matrix</p>
-          <div class="table-container">
-            <table class="data-table">
-              <thead>
-                <tr><th>Symptom</th><th>dmesg / OS Error</th><th>Root Cause</th><th>Resolution</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>Wi-Fi device missing entirely</strong></td>
-                  <td class="mono">lspci shows nothing; Device Manager Code 45</td>
-                  <td>EC controller state machine deadlock due to hardware-level sleep register crash.</td>
-                  <td class="hl">60-Second EC Drain (Unplug power, hold power button for 60s).</td>
-                </tr>
-                <tr>
-                  <td><strong>Driver fails to load on boot</strong></td>
-                  <td class="mono">mt7921e: probe failed with error -5</td>
-                  <td>PCIe sleep protection deadlock (<code>0x18011100</code>) caused by Windows Fast Startup.</td>
-                  <td class="hl">Disable Windows Fast Startup; reboot.</td>
-                </tr>
-                <tr>
-                  <td><strong>Intermittent drops under load</strong></td>
-                  <td class="mono">mt7921e: WMT trigger abort</td>
-                  <td>Power management sleep states (ASPM) conflict on AMD Ryzen platform.</td>
-                  <td class="hl">Disable PCIe ASPM for Wi-Fi card: add <code class="mono">pcie_aspm=off</code> to GRUB command line.</td>
-                </tr>
-                <tr>
-                  <td><strong>Latency spikes / high ping</strong></td>
-                  <td class="mono">Firmware command timeout</td>
-                  <td>Firmware regression in recent kernel package updates.</td>
-                  <td class="hl">Roll back Wi-Fi firmware files to stable version <code class="mono">20250311-1</code>.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
         </div>
       </div>
 
