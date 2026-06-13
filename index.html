@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dual Boot Setup Guide — Atikur's Legion 5</title>
+<title>Dual Boot Setup Guide — Legion 5</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <!-- Mobile Header -->
 <header class="mobile-header">
-  <button class="menu-toggle" id="menu-btn" onclick="toggleSidebar()" aria-label="Toggle Navigation">
+  <button class="menu-toggle" id="menu-btn" onclick="toggleSidebar()" aria-label="Toggle Navigation" aria-expanded="false">
     <div class="hamburger-box">
       <span class="hamburger-line"></span>
       <span class="hamburger-line"></span>
@@ -771,7 +771,7 @@
   <div class="phase-header">
     <div class="phase-tag">Phase 3</div>
     <div class="phase-title">💾 Create Ubuntu Bootable USB</div>
-    <div class="phase-desc">Download Ubuntu 26.04 LTS and flash it to a USB drive. You need a USB drive of at least 8GB — this will be erased.</div>
+    <div class="phase-desc">Download Ubuntu 26.04 LTS (6.1GB ISO) and flash it to a USB drive. You need a USB drive of at least 16GB (12GB free) — this will be erased.</div>
   </div>
   <div class="content-body">
  
@@ -782,14 +782,14 @@
         <div class="step-header" onclick="toggleStep(this)">
           <div class="step-num">1</div>
           <div class="step-title">Download Ubuntu 26.04 LTS ISO</div>
-          <span class="step-badge badge-info">~5.5GB</span>
+          <span class="step-badge badge-info">~6.1GB</span>
           <span class="step-chevron">▶</span>
         </div>
         <div class="step-body">
           <ol>
             <li>Go to: <code>ubuntu.com/download/desktop</code></li>
             <li>Download <strong>Ubuntu 26.04 LTS</strong> (the "LTS" version — supported until 2031)</li>
-            <li>File will be named like: <code>ubuntu-26.04-desktop-amd64.iso</code> (~5.5GB)</li>
+            <li>File will be named like: <code>ubuntu-26.04-desktop-amd64.iso</code> (~6.1GB)</li>
             <li>Verify the SHA256 checksum after download:</li>
           </ol>
           <div class="code-block">
@@ -799,7 +799,7 @@
           </div>
           <div class="callout tip">
             <span class="callout-icon">💡</span>
-            <div>Why 26.04 LTS? Supported until April 2031, latest system packages (GNOME 50, Linux Kernel 7.0), and excellent Wayland performance. Avoid non-LTS releases for a stable development stack.</div>
+            <div>Why 26.04 LTS? Supported until April 2031, confirmed GNOME 50 + Linux 7.0 + Wayland-only, NVIDIA driver 595+ with default DRM modeset, and Python 3.14 in base. Avoid non-LTS releases for a stable dev stack.</div>
           </div>
         </div>
       </div>
@@ -814,7 +814,7 @@
         <div class="step-body">
           <ol>
             <li>Download <strong>Balena Etcher</strong>: <code>etcher.balena.io</code> (free, portable .exe)</li>
-            <li>Plug in your USB drive (≥8GB) — all data will be erased</li>
+            <li>Plug in your USB drive (≥16GB) — the 6.1GB ISO needs decompression room; all data will be erased</li>
             <li>Open Etcher → Click <strong>"Flash from file"</strong></li>
             <li>Select your <code>ubuntu-26.04-desktop-amd64.iso</code></li>
             <li>Click <strong>"Select target"</strong> → select your USB drive (double-check the size!)</li>
@@ -894,8 +894,8 @@
             <span class="callout-icon">💡</span>
             <div><strong>Secure Boot Options & Tradeoffs:</strong>
               <ul style="margin-left: 15px; margin-top: 5px;">
-                <li><strong>Enabled (Recommended):</strong> Mandated for Windows 11 compliance and kernel-level anti-cheat engines (Riot Vanguard for Valorant/League of Legends). Requires completing MOK (Machine Owner Key) enrollment in Phase 6 to sign and load the Nvidia proprietary modules.</li>
-                <li><strong>Disabled (Fallback / Simple Path):</strong> The path of least resistance for Linux driver compatibility. Bypasses MOK signing requirements for Nvidia, MediaTek Wi-Fi, and custom Realtek audio patches, but weakens boot security and disables Vanguard anti-cheat on Windows.</li>
+                <li><strong>Enabled (Recommended):</strong> Mandated for Windows 11 compliance, anti-cheat engines (Vanguard/Valorant), and Ubuntu 26.04's signed GRUB 2.14 boot chain. Requires MOK enrollment for NVIDIA driver 595+ (prompts on first boot).</li>
+                <li><strong>Disabled (Fallback):</strong> Bypasses MOK enrollment requirement entirely. NVIDIA, MediaTek, and Realtek audio drivers load without signing. Weaker boot security, no Vanguard anti-cheat on Windows.</li>
               </ul>
             </div>
           </div>
@@ -943,12 +943,12 @@
             <li><strong>Language:</strong> English → <strong>Continue</strong></li>
             <li><strong>Keyboard:</strong> English (US) → <strong>Continue</strong></li>
             <li><strong>Connect to WiFi:</strong> Connect to your network (optional but recommended for updates) → <strong>Continue</strong></li>
-            <li><strong>What apps to install:</strong> Select <strong>"Default selection"</strong> (NOT "Extended selection" — you'll install ML tools manually) → <strong>Continue</strong></li>
+            <li><strong>What apps to install:</strong> Select <strong>"Default selection"</strong> (NOT "Extended" — you'll install ML tools manually) → <strong>Continue</strong></li>
             <li><strong>Install recommended drivers?</strong> Check <strong>"Install third-party software for graphics and WiFi"</strong> → <strong>Continue</strong></li>
           </ol>
           <div class="callout danger">
             <span class="callout-icon">⚠️</span>
-            <div><strong>WARNING: TPM-Backed Encryption.</strong> In Ubuntu 26.04, the installer offers LVM and TPM-backed Full Disk Encryption (FDE). **Do NOT enable encryption.** Running TPM encryption on a dual-boot setup will conflict with Windows' control of the hardware TPM chip, leading to boot lockouts on both systems. Keep encryption disabled.</div>
+            <div><strong>WARNING: TPM-Backed Encryption.</strong> Ubuntu 26.04 installer offers LVM + TPM-backed Full Disk Encryption (FDE). <strong>Do NOT enable encryption.</strong> Running TPM encryption on a dual-boot setup will conflict with Windows' control of the hardware TPM chip, leading to boot lockouts on both systems. Keep encryption disabled.</div>
           </div>
           <div class="callout warn">
             <span class="callout-icon">⚠️</span>
@@ -1077,27 +1077,24 @@
       <div class="step-card danger-card">
         <div class="step-header" onclick="toggleStep(this)">
           <div class="step-num">2</div>
-          <div class="step-title">Install NVIDIA driver for RTX 3060 (with Secure Boot MOK)</div>
+          <div class="step-title">Install NVIDIA driver 595+ for RTX 3060 (Secure Boot MOK)</div>
           <span class="step-badge badge-critical">GPU SETUP</span>
           <span class="step-chevron">▶</span>
         </div>
         <div class="step-body">
-          <p>Ubuntu 26.04 runs a Wayland-only GNOME session. The open-source Nouveau driver is unstable under Wayland for NVIDIA GPUs. You MUST install the proprietary NVIDIA driver for basic performance and display correctness.</p>
+          <p>Ubuntu 26.04 runs a Wayland-only GNOME session (no X11). Nouveau is unusable. You MUST install the proprietary NVIDIA driver 595+ for any display functionality. Driver 595+ has <code>nvidia-drm.modeset=1</code> enabled by default — no manual GRUB edits needed.</p>
           <div class="code-block">
             <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
             <pre><span class="cmt"># Check which NVIDIA driver is recommended</span>
 <span class="cmd">ubuntu-drivers devices</span>
 
-<span class="cmt"># Install the recommended driver (usually nvidia-driver-550 or 560)</span>
-<span class="cmd">sudo ubuntu-drivers autoinstall</span>
-
-<span class="cmt"># OR install specific version manually</span>
-<span class="cmd">sudo apt install</span> <span class="arg">-y nvidia-driver-560</span></pre>
+<span class="cmt"># Install the recommended driver (should be nvidia-driver-595)</span>
+<span class="cmd">sudo ubuntu-drivers autoinstall</span></pre>
           </div>
 
           <div class="callout warn">
             <span class="callout-icon">⚠️</span>
-            <div><strong>Secure Boot Password (MOK):</strong> During driver installation, a terminal prompt will pop up asking to configure a password for Secure Boot / MOK. <strong>Create a simple password (e.g., <code>12345678</code>)</strong> and confirm it. You will need this key upon restart.</div>
+            <div><strong>Secure Boot Password (MOK):</strong> A terminal prompt will ask for a Secure Boot password. <strong>Create a simple password (e.g., <code>12345678</code>)</strong>. You will need it to sign the driver on reboot.</div>
           </div>
 
           <p>After installation completes, reboot the system:</p>
@@ -1110,26 +1107,27 @@
             <span class="callout-icon">🔵</span>
             <div><strong>CRITICAL: Enroll MOK on Reboot (Blue Screen)</strong>
               <ol style="margin-left: 15px; margin-top: 5px;">
-                <li>On boot, a blue screen will display: <strong>"Perform MOK management"</strong>.</li>
-                <li><strong>Press any key within 10 seconds</strong> to enter the menu. (If you miss it, the drivers won't load and you'll boot with a laggy UI).</li>
-                <li>Select <strong>Enroll MOK</strong> → select <strong>Continue</strong> → select <strong>Yes</strong>.</li>
-                <li>Enter the password you created during terminal installation (characters will not show).</li>
+                <li>On boot, a blue screen: <strong>"Perform MOK management"</strong>.</li>
+                <li><strong>Press any key within 10 seconds</strong> — missing this means the driver signature isn't loaded and you'll get a black/glitching Wayland session.</li>
+                <li>Select <strong>Enroll MOK</strong> → <strong>Continue</strong> → <strong>Yes</strong>.</li>
+                <li>Enter the password you created during install (keystrokes hidden).</li>
                 <li>Select <strong>Reboot</strong>.</li>
               </ol>
             </div>
           </div>
 
-          <p>Once booted back into Ubuntu, verify the driver is active:</p>
+          <p>Once booted back into Ubuntu, verify:</p>
           <div class="code-block">
             <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
-            <pre><span class="cmt"># Should show RTX 3060 info and driver version</span>
+            <pre><span class="cmt"># Should show RTX 3060 + driver 595.x</span>
 <span class="cmd">nvidia-smi</span>
 
-<span class="cmt"># Expected output: NVIDIA-SMI 560.x | Driver 560.x | CUDA 12.x</span></pre>
+<span class="cmt"># Verify DRM modeset is default (should show Y)</span>
+<span class="cmd">cat</span> <span class="arg">/sys/module/nvidia_drm/parameters/modeset</span></pre>
           </div>
           <div class="callout warn">
             <span class="callout-icon">⚠️</span>
-            <div>If <code>nvidia-smi</code> says "command not found" or shows errors, the signature block is preventing the driver from loading. Run <code>sudo mokutil --import /var/lib/shim-signed/mok/MOK.der</code> to re-trigger enrollment on the next reboot.</div>
+            <div>If <code>nvidia-smi</code> fails, MOK enrollment was missed. Re-run: <code>sudo mokutil --import /var/lib/shim-signed/mok/MOK.der</code> and reboot to re-trigger the blue screen.</div>
           </div>
         </div>
       </div>
@@ -1169,35 +1167,32 @@
         </div>
       </div>
 
-      <div class="step-card danger-card">
+      <div class="step-card">
         <div class="step-header" onclick="toggleStep(this)">
           <div class="step-num">4</div>
-          <div class="step-title">Configure KMS & DRM Mode Setting for Wayland Display Server</div>
-          <span class="step-badge badge-critical">WAYLAND OPTIMIZE</span>
+          <div class="step-title">Verify Wayland + NVIDIA GPU compositing</div>
+          <span class="step-badge badge-ok">WAYLAND OK</span>
           <span class="step-chevron">▶</span>
         </div>
         <div class="step-body">
-          <p>On hybrid Legion laptops running Ubuntu 26.04 (which is Wayland-only by default), you will experience micro-stutters, external monitor lag over HDMI, or severe gaming FPS drops in Steam/Proton (e.g. Cyberpunk 2077). This is caused by mismatched buffer synchronization between the iGPU (compositor) and dGPU (renderer). Enforcing Kernel Mode Setting (KMS) fixes this.</p>
+          <p>NVIDIA driver 595+ enables <code>nvidia-drm.modeset=1</code> by default — no manual GRUB edits needed. On Legion 5 hybrid graphics, verify the stack is correct:</p>
           <div class="code-block">
             <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
-            <pre><span class="cmt"># Edit the GRUB bootloader configuration</span>
-<span class="cmd">sudo nano</span> <span class="arg">/etc/default/grub</span></pre>
+            <pre><span class="cmt"># Confirm Wayland session</span>
+<span class="cmd">echo</span> <span class="arg">$XDG_SESSION_TYPE</span>
+<span class="cmt"># Should output: wayland</span>
+
+<span class="cmt"># DRM modeset should be Y by default in 595+</span>
+<span class="cmd">cat</span> <span class="arg">/sys/module/nvidia_drm/parameters/modeset</span>
+
+<span class="cmt"># Check GDM allows Wayland (should be uncommented)</span>
+<span class="cmd">grep</span> <span class="arg">WaylandEnable /etc/gdm3/custom.conf</span>
+<span class="cmt"># Line should be: #WaylandEnable=false (commented out = enabled)</span></pre>
           </div>
-          <p>Find the line starting with <code>GRUB_CMDLINE_LINUX_DEFAULT</code> and append the DRM mode setting command inside the quotes. It should look like this:</p>
-          <div class="code-block">
-            <div class="code-header"><span class="code-lang">/etc/default/grub</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
-            <pre><span class="str">GRUB_CMDLINE_LINUX_DEFAULT="quiet splash nvidia-drm.modeset=1"</span></pre>
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div>If you see micro-stutters on external HDMI displays, the fix is now in <code>nvidia 595+</code> itself — ensure you're on the latest driver version via <code>sudo apt update && sudo apt upgrade</code>. No more manual DRM flags.</div>
           </div>
-          <p>Save and exit Nano (<code>Ctrl + O</code>, <code>Enter</code>, <code>Ctrl + X</code>), then rebuild the bootloader config and reboot:</p>
-          <div class="code-block">
-            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
-            <pre><span class="cmt"># Update GRUB to load the DRM setting at boot</span>
-<span class="cmd">sudo update-grub</span>
- 
-<span class="cmt"># Reboot the laptop</span>
-<span class="cmd">sudo reboot</span></pre>
-          </div>
-          <p>After rebooting, verify DRM modeset is loaded: <code>cat /sys/module/nvidia_drm/parameters/modeset</code> (should output <code>Y</code>).</p>
         </div>
       </div>
 
@@ -1211,7 +1206,9 @@
         <div class="step-body">
           <div class="code-block">
             <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
-            <pre><span class="cmt"># Enable firewall</span>
+            <pre><span class="cmt"># Note: No nomodeset needed on 26.04 — Wayland-only, driver 595+ handles modeset</span>
+
+<span class="cmt"># Enable firewall</span>
 <span class="cmd">sudo ufw enable</span>
 <span class="cmd">sudo ufw status</span>
 
@@ -1255,36 +1252,38 @@
       <div class="step-card danger-card">
         <div class="step-header" onclick="toggleStep(this)">
           <div class="step-num">1</div>
-          <div class="step-title">Install CUDA 12.8 Toolkit</div>
+          <div class="step-title">Install CUDA Toolkit</div>
           <span class="step-badge badge-critical">GPU COMPUTE</span>
           <span class="step-chevron">▶</span>
         </div>
         <div class="step-body">
-          <div class="callout warn">
-            <span class="callout-icon">⚠️</span>
-            <div>The CUDA Toolkit version should match what your driver supports. If <code>nvidia-smi</code> shows "CUDA Version: 12.8" or newer, install CUDA 12.8. Do not install CUDA 11.x.</div>
+          <div class="callout info">
+            <span class="callout-icon">ℹ️</span>
+            <div>Ubuntu 26.04 can now install CUDA from the official Ubuntu repository (restricted). No need for NVIDIA's external repo. Check <code>nvidia-smi</code> first to see which CUDA version your driver 595+ supports.</div>
           </div>
           <div class="code-block">
-            <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <div class="code-header"><span class="code-lang">Terminal — Method A (Ubuntu repos, recommended)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
             <pre><span class="cmt"># Check max supported CUDA version from driver</span>
 <span class="cmd">nvidia-smi</span> <span class="arg">| grep "CUDA Version"</span>
+
+<span class="cmt"># Try installing from Ubuntu repos first</span>
+<span class="cmd">sudo apt install</span> <span class="arg">-y nvidia-cuda-toolkit</span>
  
-<span class="cmt"># Add NVIDIA CUDA repository for Ubuntu 26.04</span>
+<span class="cmt"># Add CUDA to PATH — add to ~/.bashrc</span>
+<span class="cmd">echo</span> <span class="str">'export PATH=/usr/lib/nvidia-cuda/bin:$PATH'</span> <span class="arg">>> ~/.bashrc</span>
+<span class="cmd">echo</span> <span class="str">'export LD_LIBRARY_PATH=/usr/lib/nvidia-cuda/lib64:$LD_LIBRARY_PATH'</span> <span class="arg">>> ~/.bashrc</span>
+<span class="cmd">source</span> <span class="arg">~/.bashrc</span>
+
+<span class="cmt"># Verify</span>
+<span class="cmd">nvcc</span> <span class="arg">--version</span></pre>
+          </div>
+          <div class="code-block">
+            <div class="code-header"><span class="code-lang">Terminal — Method B (NVIDIA repo, fallback)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+            <pre><span class="cmt"># Only if Ubuntu repo doesn't have CUDA</span>
 <span class="cmd">wget</span> <span class="arg">https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2604/x86_64/cuda-keyring_1.1-1_all.deb</span>
 <span class="cmd">sudo dpkg</span> <span class="arg">-i cuda-keyring_1.1-1_all.deb</span>
 <span class="cmd">sudo apt-get update</span>
- 
-<span class="cmt"># Install CUDA 12.8 (adjust version if needed)</span>
-<span class="cmd">sudo apt-get install</span> <span class="arg">-y cuda-toolkit-12-8</span>
- 
-<span class="cmt"># Add CUDA to PATH — add these to ~/.bashrc</span>
-<span class="cmd">echo</span> <span class="str">'export PATH=/usr/local/cuda-12.8/bin:$PATH'</span> <span class="arg">>> ~/.bashrc</span>
-<span class="cmd">echo</span> <span class="str">'export LD_LIBRARY_PATH=/usr/local/cuda-12.8/lib64:$LD_LIBRARY_PATH'</span> <span class="arg">>> ~/.bashrc</span>
-<span class="cmd">source</span> <span class="arg">~/.bashrc</span>
- 
-<span class="cmt"># Verify CUDA installation</span>
-<span class="cmd">nvcc</span> <span class="arg">--version</span>
-<span class="cmt"># Should show: Cuda compilation tools, release 12.8</span></pre>
+<span class="cmd">sudo apt-get install</span> <span class="arg">-y cuda-toolkit-12-8</span></pre>
           </div>
         </div>
       </div>
@@ -1335,15 +1334,15 @@
         <div class="step-body">
           <div class="code-block">
             <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
-            <pre><span class="cmt"># Create dedicated ML environment (Python 3.12 is standard in 2026)</span>
+            <pre><span class="cmt"># Create dedicated ML environment (use 3.12 — system is 3.14 but PyTorch may lag)</span>
 <span class="cmd">conda create</span> <span class="arg">-n ml python=3.12 -y</span>
 <span class="cmd">conda activate ml</span>
  
-<span class="cmt"># Install PyTorch with CUDA support (e.g., cu126 or cu130 depending on driver version)</span>
+<span class="cmt"># Install PyTorch with CUDA 12.x support (cu126 or cu130 depending on nvidia-smi)</span>
 <span class="cmt"># Get latest command from: pytorch.org/get-started/locally/</span>
 <span class="cmd">pip install torch torchvision torchaudio</span> <span class="arg">--index-url https://download.pytorch.org/whl/cu126</span>
  
-<span class="cmt"># Verify GPU works with PyTorch</span>
+            <span class="cmt"># Verify GPU works with PyTorch (in conda env, not system Python 3.14)</span>
 <span class="cmd">python</span> <span class="arg">-c "import torch; print(torch.cuda.is_available()); print(torch.cuda.get_device_name(0))"</span>
 <span class="cmt"># Should print: True</span>
 <span class="cmt"># Should print: NVIDIA GeForce RTX 3060 Laptop GPU</span>
@@ -1372,6 +1371,7 @@
           <div class="code-block">
             <div class="code-header"><span class="code-lang">Terminal</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
             <pre><span class="cmt"># Separate conda env for Scholar-Flow backend Python work</span>
+<span class="cmt"># System Python is 3.14; Scholar-Flow uses 3.11 — keep conda env</span>
 <span class="cmd">conda create</span> <span class="arg">-n dev python=3.11 -y</span>
 <span class="cmd">conda activate dev</span>
 <span class="cmd">pip install</span> <span class="arg">fastapi uvicorn sqlalchemy psycopg2-binary python-dotenv</span>
@@ -1677,23 +1677,24 @@
       <div class="step-card warn-card">
         <div class="step-header" onclick="toggleStep(this)">
           <div class="step-num">⚠</div>
-          <div class="step-title">Black screen after Ubuntu boots (NVIDIA issue)</div>
+          <div class="step-title">Black screen after Ubuntu boots (NVIDIA + Wayland issue)</div>
           <span class="step-badge badge-warn">COMMON</span>
           <span class="step-chevron">▶</span>
         </div>
         <div class="step-body">
-          <p>GRUB shows, Ubuntu starts loading, then black screen — nothing.</p>
+          <p>GRUB shows, Ubuntu starts loading GNOME 50, then screen stays black.</p>
+          <p><strong>Ubuntu 26.04 is Wayland-only — <code>nomodeset</code> does NOT work</strong> (that kernel param only enables X11 fallback modesetting, which doesn't exist in 26.04). The fix is MOK + driver reinstall:</p>
           <ol>
-            <li>At GRUB menu: press <strong>E</strong> to edit Ubuntu entry</li>
-            <li>Find the line starting with <code>linux</code></li>
-            <li>At the end of that line, before <code>quiet splash</code>, add: <code>nomodeset</code></li>
-            <li>Press <strong>F10</strong> to boot with this option</li>
-            <li>Once in Ubuntu: install NVIDIA driver properly (Step 2 of Phase 6)</li>
-            <li>After driver is installed and rebooted: remove <code>nomodeset</code> (it's only temporary)</li>
+            <li>At GRUB menu: press <strong>E</strong> to edit the Ubuntu entry</li>
+            <li>Add <code>modprobe.blacklist=nouveau</code> before <code>quiet splash</code> (disables Nouveau forcing NVIDIA to load)</li>
+            <li>Press <strong>F10</strong> to boot — should get a working (software-rendered) Wayland session</li>
+            <li>Install or reinstall the NVIDIA driver 595: <code>sudo ubuntu-drivers autoinstall</code> && <code>sudo reboot</code></li>
+            <li>Watch for the <strong>blue MOK management screen</strong> on reboot — press any key, Enroll MOK, enter your password</li>
+            <li>After successful MOK enrollment, the NVIDIA driver loads with DRM modeset and Wayland works natively</li>
           </ol>
           <div class="callout info">
             <span class="callout-icon">ℹ️</span>
-            <div>To remove nomodeset permanently: <code>sudo nano /etc/default/grub</code> → find <code>GRUB_CMDLINE_LINUX_DEFAULT</code> → remove "nomodeset" → <code>sudo update-grub</code></div>
+            <div>If you missed the MOK screen: <code>sudo mokutil --import /var/lib/shim-signed/mok/MOK.der</code> → reboot → blue screen appears again. Also verify <code>/etc/gdm3/custom.conf</code> has <code>#WaylandEnable=false</code> (commented out).</div>
           </div>
         </div>
       </div>
@@ -1913,12 +1914,12 @@ mt7921e: probe of 0000:04:00.0 failed with error -5</pre>
           <span class="step-chevron">▶</span>
         </div>
         <div class="step-body">
-          <p>Since Ubuntu 26.04 is Wayland-only (X11 removed), hybrid GPU displays can experience minor refresh lag or screen freezes under Wayland.</p>
+          <p>Ubuntu 26.04 is Wayland-only (no X11). With NVIDIA driver 595+, explicit sync and DRM modeset are default — most stutter issues from 24.04 are resolved. If you still see them:</p>
           <ol style="margin-left: 15px; margin-top: 5px;">
-            <li>Verify you are indeed running on Wayland: <code>echo $XDG_SESSION_TYPE</code> (should return <code>wayland</code>).</li>
-            <li>Ensure the proprietary NVIDIA driver is actually loaded: run <code>nvidia-smi</code>. If it doesn't load, Wayland runs on CPU/software rendering, causing massive lags.</li>
-            <li><strong>Fractional Scaling Stutter:</strong> If you use scale settings like 125% or 150%, Wayland + NVIDIA can stutter on hybrid setups. Try reverting display scale to 100% or 200%.</li>
-            <li><strong>GDM Configuration:</strong> Ensure GDM allows Wayland. Open <code>/etc/gdm3/custom.conf</code> and ensure <code>WaylandEnable=false</code> is fully commented out (prefixed with <code>#</code>).</li>
+            <li>Confirm Wayland session: <code>echo $XDG_SESSION_TYPE</code> should return <code>wayland</code>.</li>
+            <li>Confirm NVIDIA driver is loaded: <code>nvidia-smi</code> should show driver 595.x. If not, MOK enrollment was likely missed.</li>
+            <li><strong>Fractional Scaling:</strong> 125%/150% can still stutter on hybrid setups. Set to 100% or 200% in GNOME Display settings for smooth performance.</li>
+            <li><strong>Prime Select:</strong> Run <code>sudo prime-select nvidia</code> → reboot. Forces dGPU for display compositing, eliminating iGPU/dGPU buffer sync issues. Costs ~15W battery but fixes all stutters.</li>
           </ol>
         </div>
       </div>
@@ -2050,8 +2051,10 @@ mt7921e: probe of 0000:04:00.0 failed with error -5</pre>
             <li>GRUB shows both Ubuntu and Windows Boot Manager</li>
             <li>Windows boots normally, no BitLocker issues</li>
             <li>Ubuntu boots with GNOME desktop</li>
-            <li><code>nvidia-smi</code> shows RTX 3060 Laptop GPU</li>
-            <li><code>nvcc --version</code> shows CUDA 12.8</li>
+            <li><code>nvidia-smi</code> shows RTX 3060 Laptop GPU + driver 595.x</li>
+            <li><code>nvcc --version</code> shows CUDA 12.x</li>
+            <li>Wayland session active: <code>echo $XDG_SESSION_TYPE</code> → wayland</li>
+            <li>DRM modeset enabled by default: <code>cat /sys/module/nvidia_drm/parameters/modeset</code> → Y</li>
             <li>PyTorch <code>torch.cuda.is_available()</code> returns True</li>
             <li>SSH to GitHub works (<code>ssh -T git@github.com</code>)</li>
             <li>Node.js 22 + Yarn Berry 4.9.2 installed</li>
@@ -2100,10 +2103,11 @@ function toggleSidebar() {
   const sidebar = document.querySelector('.sidebar');
   const backdrop = document.getElementById('sidebar-backdrop');
   const btn = document.getElementById('menu-btn');
+  const isOpen = sidebar.classList.toggle('open');
   
-  sidebar.classList.toggle('open');
   backdrop.classList.toggle('active');
   btn.classList.toggle('open');
+  btn.setAttribute('aria-expanded', isOpen);
 }
 
 function closeSidebar() {
@@ -2114,6 +2118,7 @@ function closeSidebar() {
   sidebar.classList.remove('open');
   backdrop.classList.remove('active');
   btn.classList.remove('open');
+  btn.setAttribute('aria-expanded', 'false');
 }
 
 function updateProgress(phaseId) {
